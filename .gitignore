@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.*
+*.xlsm
+*prive*.json
+*privé*.json
+marge-budget-*.json
+.DS_Store
+*excel*.json

@@ -1,0 +1,83 @@
+/* Cohérence entre les Web Components et le thème nicolabz.dev. */
+:root, :root.wa-dark {
+  --wa-color-brand-50: #f1faf3;
+  --wa-color-brand-100: #e5f3e8;
+  --wa-color-brand-200: #cfe5d5;
+  --wa-color-brand-300: #acd0b8;
+  --wa-color-brand-400: #92c3a3;
+  --wa-color-brand-500: #7bad8e;
+  --wa-color-brand-600: #628c74;
+  --wa-color-brand-700: #426551;
+  --wa-color-brand-800: #2f4c3b;
+  --wa-color-brand-900: #243e2e;
+  --wa-color-brand-950: #172b20;
+  /* Le focus Web Awesome ne doit plus hériter du bleu du thème par défaut. */
+  --wa-color-focus: #acd0b8;
+}
+wa-button.btn::part(base), wa-button.btn::part(button) { font-family:inherit; }
+wa-button.btn { display:inline-block; vertical-align:middle; background:transparent; border:0; padding:0; min-height:unset; }
+wa-button.btn::part(button) { border-radius:10px; font-weight:650; }
+wa-button.btn::part(base) { border-radius:10px; font-weight:650; }
+wa-button.btn.primary::part(button), wa-button.btn.primary::part(base) { background:var(--accent); color:#14251d; border-color:var(--accent); }
+wa-button.btn.secondary::part(button), wa-button.btn.secondary::part(base) { background:#263330; color:var(--text); border-color:var(--line); }
+wa-button.btn.quiet::part(button), wa-button.btn.quiet::part(base) { background:#293835; color:var(--text); border-color:var(--line); }
+wa-button.btn.danger::part(button), wa-button.btn.danger::part(base) { background:#432f30; color:#ffd4d4; border-color:#885d5d; }
+wa-button.btn.text-btn::part(button), wa-button.btn.text-btn::part(base) { background:transparent; color:var(--accent); border:0; text-decoration:underline; }
+wa-button.btn.small::part(button), wa-button.btn.small::part(base) { min-height:32px; font-size:12px; }
+wa-button.header-wa-button::part(button), wa-button.header-wa-button::part(base) { width:39px; height:39px; border-radius:50%; background:#1d2828; border-color:var(--line); color:var(--accent); padding:0; }
+wa-button.header-wa-button::part(base):hover { background:#354842; }
+wa-progress-bar { --height:9px; --track-color:#30403f; --indicator-color:var(--accent); --border-radius:99px; display:block; width:100%; }
+wa-progress-bar.large { --height:12px; margin:18px 0 9px; }
+.drive-panel { margin-top:15px; }
+.drive-status { display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:12px; color:var(--muted); margin:16px 0; }
+.drive-status::before { content:''; width:8px; height:8px; border-radius:50%; background:#7a807d; }
+.drive-status.connected::before { background:#91d4ac; }
+.drive-actions { display:flex; flex-direction:column; gap:9px; }
+.drive-actions wa-button { width:100%; }
+.drive-actions wa-button::part(base) { width:100%; }
+.drive-meta { color:var(--muted); font-size:12px; line-height:1.6; }
+@media(max-width:590px){.header-wa-button{margin-right:0}.drive-actions{gap:7px}}
+
+wa-button.btn:not(:defined) { font-size:13px; padding:11px 15px; border-radius:10px; background:#263330; border:1px solid var(--line); cursor:pointer; color:var(--text); }
+wa-button.btn.primary:not(:defined) { background:var(--accent); color:#14251d; }
+wa-progress-bar:not(:defined) { height:9px; background:#30403f; border-radius:999px; }
+
+/* Supprimer le halo externe des champs, tout en marquant clairement le focus. */
+wa-input, wa-select, wa-textarea {
+  --wa-focus-ring: none;
+  --wa-focus-ring-width: 0px;
+  --wa-focus-ring-offset: 0px;
+}
+wa-input:focus-within::part(base),
+wa-textarea:focus-within::part(base),
+wa-select:focus-within::part(combobox) {
+  border-color: var(--sage);
+  box-shadow: inset 0 0 0 1px var(--sage);
+  outline: none;
+}
+
+/* Identité Google : avatar et menu accessibles, à la densité du dashboard. */
+wa-dropdown#profileMenu { display:inline-flex; align-items:center; }
+wa-button.profile-trigger::part(base),wa-button.profile-trigger::part(button) {
+  width:36px; height:36px; padding:0; border:0; border-radius:50%;
+  background:transparent; display:grid; place-items:center;
+}
+wa-button.profile-trigger:focus-visible::part(base) { outline:2px solid var(--sage);outline-offset:2px; }
+#profileAvatar { --size:32px; --wa-color-neutral-fill-loud:#30473b; color:#f0f2ed; }
+.profile-menu-heading { display:flex;flex-direction:column;gap:3px;padding:11px 15px 8px;min-width:224px;max-width:285px; }
+.profile-menu-heading strong { font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis; }
+.profile-menu-heading small { font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis; }
+.profile-menu-heading span { color:var(--sage);font-size:10px;margin-top:3px; }
+#profileMenu wa-dropdown-item { font-size:12px; }
+#profileMenu wa-dropdown-item[hidden] { display:none!important; }
+
+/* Rendre la session immédiatement visible, même avant le chargement de Web Awesome. */
+#saveIndicator { transition: color .15s ease; }
+#saveIndicator[data-state="connected"] { color: var(--accent); }
+#saveIndicator[data-state="connected"] .save-dot { background: var(--sage); }
+#saveIndicator[data-state="loading"] { color: var(--muted); }
+#saveIndicator[data-state="loading"] .save-dot { background: #929c96; }
+#saveIndicator[data-state="error"] { color: #ffbfae; }
+#saveIndicator[data-state="error"] .save-dot { background: #d9957a; }
+#profileAvatar[image] { --size: 34px; }
+#profileButton:focus-visible #profileAvatar { outline: 2px solid var(--sage); outline-offset: 3px; border-radius: 50%; }

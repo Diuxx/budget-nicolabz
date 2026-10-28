@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr" class="wa-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101517">
+  <meta name="description" content="{{ site.description }}">
+  <title>{{ site.name }} — Budget personnel</title>
+  {# Web Awesome 3.14, Web Components chargés à la demande ; pas de bundler frontend. #}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/styles/themes/default.css">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/webawesome.loader.js"></script>
+  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="./styles/webawesome.css">
+  <link rel="stylesheet" href="./styles/compact.css">
+  <script type="module" src="./scripts/ui/app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    {% include "components/header.njk" %}
+    <main class="main" id="app" tabindex="-1" aria-live="off">{{ content | safe }}</main>
+    {% include "components/footer.njk" %}
+  </div>
+  <input type="file" id="importInput" accept=".json,application/json" hidden>
+  <wa-dialog id="modal" label="Modifier"></wa-dialog>
+  <wa-dialog id="syncChoiceDialog" label="Conflit de synchronisation" class="sync-choice-dialog">
+    <p id="syncChoiceText">Les données sont différentes.</p>
+    <div class="sync-choice-actions">
+      <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-sync-choice="cancel">Annuler</wa-button>
+      <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-sync-choice="remote">Garder Google Drive</wa-button>
+      <wa-button type="button" size="s" appearance="filled" variant="danger" data-sync-choice="local">Garder mon navigateur</wa-button>
+    </div>
+  </wa-dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
