@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { IdentityApi, IdentityApiError } from '../src/scripts/services/identity-api.js';
 import { decideIdentitySync, synchronizeIdentity, getIdentitySyncInfo } from '../src/scripts/services/identity-sync.js';
-import { createDemoData } from '../src/scripts/core/model.js';
+import { createBudgetDemo as createDemoData } from '../src/scripts/core/period-model.js';
 
 function memoryStorage() {
   const values=new Map();
@@ -84,17 +84,17 @@ test('Drive vide : création sur confirmation avec version 0',async()=>{
 
 test('Deux appareils : téléchargement seulement après consentement si pas de point de référence',async()=>{
   const local=createDemoData(),remoteData=createDemoData();
-  remoteData.settings.salaryTarget=9999;
+  remoteData.periods[0].minMargin=9999;
   const remote={version:4,data:remoteData},storage=memoryStorage();
   let request;
   const outcome=await synchronizeIdentity(params(fakeApi(remote),storage,local,async choice=>{request=choice;return 'remote';}));
   assert.equal(request.type,'conflict');
   assert.equal(outcome,'downloaded');
-  assert.equal(local.settings.salaryTarget,9999);
+  assert.equal(local.periods[0].minMargin,9999);
 });
 
 test('Refus de conflit : aucune donnée remplacée',async()=>{
-  const local=createDemoData(),remoteData=createDemoData();remoteData.settings.salaryTarget=42;
+  const local=createDemoData(),remoteData=createDemoData();remoteData.periods[0].minMargin=42;
   const remote={version:8,data:remoteData};
   let write=false;
   const outcome=await synchronizeIdentity(params(fakeApi(remote,()=>{write=true;}),memoryStorage(),local,async()=> 'cancel'));
@@ -119,7 +119,7 @@ test('Conservation du budget local : aucune opération API ne supprime localStor
   const storage=memoryStorage(),local=createDemoData();
   await synchronizeIdentity(params(fakeApi({version:0,data:null}),storage,local,async()=> 'cancel'));
   assert.equal(getIdentitySyncInfo({storage,appId:'budget',userId:'userA'}),null);
-  assert.equal(local.version,2);
+  assert.equal(local.version,4);
 });
 
 

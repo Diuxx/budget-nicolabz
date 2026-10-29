@@ -1,0 +1,92 @@
+{
+  "version": 4,
+  "periods": [],
+  "accounts": [
+    {
+      "id": "main",
+      "name": "Compte principal",
+      "type": "Compte courant"
+    }
+  ],
+  "expenseCategories": [
+    {
+      "id": "housing",
+      "name": "Logement"
+    },
+    {
+      "id": "utilities",
+      "name": "Charges et abonnements"
+    },
+    {
+      "id": "food",
+      "name": "Alimentation"
+    },
+    {
+      "id": "transport",
+      "name": "Transport"
+    },
+    {
+      "id": "health",
+      "name": "Santé"
+    },
+    {
+      "id": "leisure",
+      "name": "Loisirs"
+    },
+    {
+      "id": "credit",
+      "name": "Crédit"
+    },
+    {
+      "id": "savings",
+      "name": "Épargne"
+    },
+    {
+      "id": "project",
+      "name": "Projet"
+    },
+    {
+      "id": "other",
+      "name": "Autres"
+    }
+  ],
+  "incomeTypes": [
+    {
+      "id": "salary",
+      "name": "Salaire",
+      "saving": false
+    },
+    {
+      "id": "bonus",
+      "name": "Prime",
+      "saving": false
+    },
+    {
+      "id": "other",
+      "name": "Autre revenu",
+      "saving": false
+    },
+    {
+      "id": "transfer",
+      "name": "Virement interne",
+      "saving": false
+    },
+    {
+      "id": "livret",
+      "name": "Livret A",
+      "saving": true
+    },
+    {
+      "id": "pel",
+      "name": "PEL",
+      "saving": true
+    },
+    {
+      "id": "pea",
+      "name": "PEA",
+      "saving": true
+    }
+  ],
+  "projects": [],
+  "legacyTransactions": []
+}

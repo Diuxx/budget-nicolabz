@@ -14,6 +14,8 @@ test('Le retour OAuth met à jour l’avatar et le statut depuis GET /api/sessio
   const elements=new Map();
   const get=selector=>{if(!elements.has(selector))elements.set(selector,fakeNode());return elements.get(selector);};
   const initialUrl='http://localhost:8081/?auth=connected#dashboard';
+  const controls=new Map();
+  const resetDialog={querySelector:selector=>{if(!controls.has(selector))controls.set(selector,fakeNode());return controls.get(selector);}};
   let cleanedUrl=null;
   let sessionRequestCount=0;
   globalThis.fetch=async url=>{
@@ -28,7 +30,7 @@ test('Le retour OAuth met à jour l’avatar et le statut depuis GET /api/sessio
   globalThis.location={href:initialUrl,origin:'http://localhost:8081',hostname:'localhost',pathname:'/',search:'?auth=connected',hash:'#dashboard'};
   globalThis.history={replaceState:(_a,_b,url)=>{cleanedUrl=url;}};
   globalThis.document={
-    querySelector:get,
+    querySelector:selector=>selector==='#resetDialog'?resetDialog:get(selector),
     querySelectorAll:()=>[],
     addEventListener:()=>{},
   };

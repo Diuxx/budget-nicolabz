@@ -88,3 +88,9 @@ export async function synchronizeIdentity({ api, userId, getData, setData, choos
   }
   throw new Error('Choix de synchronisation non reconnu.');
 }
+
+/** Référence la nouvelle version distante après une remise à zéro volontaire. */
+export async function markIdentitySynced({ storage, appId, userId, version, data }) {
+  if (!userId || !Number.isSafeInteger(version) || version < 0) throw new Error('Référence Drive invalide.');
+  writeAnchor(storage, appId, userId, version, await digestData(normalizeImport(data)));
+}

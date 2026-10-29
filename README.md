@@ -1,44 +1,41 @@
-# Marge V9 — Correction de la session Google dans Chromium
+# Marge v0.8.5 — Budget mensuel
 
-Cette version corrige le message « Service indisponible » affiché à tort alors que `GET /api/session` renvoie une session Google valide. La cause était un appel de `window.fetch` avec le mauvais `this` dans `src/scripts/services/identity-api.js`.
+Application de budget personnel en Eleventy, JavaScript et Web Awesome. Le fonctionnement reprend la partie Budget du projet `todo`, avec le thème sombre de Marge.
 
-**Changement ciblé :** `fetchFunction.bind(globalThis)` afin de conserver le contexte attendu par Chromium. La cause des erreurs réseau reste accessible dans la console via `IdentityApiError.cause`.
+## Fonctionnement
 
-Aucune modification de Nicolabz Identity, des variables OAuth, du format des données, de la sauvegarde locale, des endpoints Drive ou des composants Web Awesome n'est nécessaire.
+- Chaque mois possède ses revenus et dépenses indépendants, avec montant et date prévus, montant et date réels.
+- Les flèches parcourent le calendrier, y compris entre décembre et janvier. Consulter un mois absent ne crée aucune donnée.
+- Le bouton « Préparer ce mois » propose de reprendre les prévisions du mois précédent. Les liens de financement sont conservés, les dates sont adaptées au nouveau mois et les montants réels restent à renseigner. Un mois existant n'est jamais écrasé.
+- Les lignes sont rattachées à un compte. Une dépense peut être financée par un revenu ; un revenu peut provenir d'un autre revenu pour représenter un virement interne.
+- La page Budget permet de filtrer les dépenses par **compte** ou par **revenu financeur**, comme dans Todo. Les montants disponibles prévus et réels sont affichés pour chaque revenu.
+- Un récapitulatif annuel présente **prévu / réel** pour chaque type de revenu d’épargne. Il n’ajoute pas les dépenses d’épargne une seconde fois.
+- Les synthèses distinguent revenus, dépenses, épargne et marge, en prévu et réel. Les virements internes ne sont pas comptés deux fois comme revenus.
+- La vue Analyses récapitule les douze mois et leur marge disponible, sans objectif minimal ni ligne de seuil.
+- Le Journal rassemble les opérations dont le réel est renseigné. Un montant réel nul est différent d'un montant non renseigné.
+- Les projets restent de type Épargne ou Demande de financement. Le montant du prêt, sa durée et sa mensualité appartiennent au projet. Ils ne créent pas automatiquement des dépenses.
+- Les paramètres permettent de gérer les catégories de dépenses, types de revenus et sauvegardes.
 
-## Vérification locale
+## Sauvegardes et migration
 
-1. Démarre Nicolabz Identity sur `http://localhost:3000`.
-2. Vérifie que son `.env` autorise bien l'origine utilisée par Marge, par exemple `http://localhost:8081`.
-3. Dans Marge, exécute `npm install` puis `npm run dev -- --port=8081`.
-4. Recharge la page en vidant le cache si nécessaire. Le statut doit passer à « Drive connecté » et la photo du compte doit s'afficher.
-5. Ouvre le menu de profil pour vérifier le nom, l'email et l'action de synchronisation.
+Le format v4 utilise des périodes `YYYY-MM`. Les anciennes sauvegardes v1/v2/v3 sont converties au chargement ou à l'import. Les mois sans montants sont ignorés, les prévisions sont reprises. Les anciens objectifs minimaux peuvent rester dans le JSON en tant que métadonnées historiques inactives ; ils ne sont plus utilisés ni affichés. Les anciens postes sont affectés à un compte « Budget importé · à affecter » pour permettre leur reclassement.
 
-Les données restent dans `localStorage`; l'authentification n'effectue aucune synchronisation automatiquement. Utilise le bouton Cloud pour synchroniser après vérification.
+L'ancien journal est conservé en archive, sans être transformé automatiquement en montants réels afin d'éviter les doublons. Les anciens paramètres et soldes restent conservés dans l'export.
 
----
+Avant la migration locale, une copie originale est enregistrée séparément et reste exportable dans Paramètres. La clé de stockage précédente est conservée. Une sauvegarde invalide affiche une récupération plutôt que d'être remplacée par des données d'exemple. Les exports v4 nécessitent cette nouvelle version de Marge.
 
-# Marge. V8 — Budget Eleventy + Nicolabz Identity
+## Démarrer et vérifier
 
-Application statique de budget personnel, créée avec **Eleventy 3**, **HTML/CSS natifs**, **JavaScript ES Modules** et **Web Awesome**. Cette version remplace le flux OAuth Google exécuté directement par Marge par l'API centralisée [`Diuxx/nodjs-google-auth`](https://github.com/Diuxx/nodjs-google-auth) (branche `develop`, consultée le 28/10/2026).
-
-## Démarrer Marge
-
-Prérequis : Node.js 20+ et npm. Dans ce dossier :
+Prérequis : Node.js 20+ et npm.
 
 ```bash
 npm install
 npm run dev
+npm test
+npm run build
 ```
 
-Ouvrir **http://localhost:8080** (ou le port réel utilisé par Eleventy, par exemple **http://localhost:8081**). Le budget est utilisable sans connexion Google : les modifications sont enregistrées dans `localStorage`. Pour la connexion et la synchronisation, il faut en plus démarrer et configurer **nodjs-google-auth** sur `http://localhost:3000` (voir ci-dessous et `docs/GOOGLE_DRIVE.md`).
-
-```bash
-npm test        # Tests métier / intégration API simulée
-npm run build   # Site statique dans dist/
-```
-
-Le script `lancer.bat` ou `lancer.sh` est également fourni (exécute Eleventy).
+Le site est disponible sur `http://localhost:8081` ; le build statique est produit dans `dist/`. `lancer.bat` et `lancer.sh` sont également fournis. Le budget fonctionne localement sans connexion Google. Les tests couvrent les calculs, copies de mois, migrations, validations, parcours d'interface et synchronisation simulée.
 
 ## Intégration avec Nicolabz Identity
 
@@ -100,3 +97,42 @@ Le budget reste une application **statique** : le backend `nodjs-google-auth` es
 - Pour publier au grand public, vérifier consentement et restrictions OAuth Google, et mettre en place les protections applicatives de production du dépôt API.
 
 Détails de mise en place : [`docs/GOOGLE_DRIVE.md`](docs/GOOGLE_DRIVE.md).
+
+## Changements 0.8.1 (depuis ton 0.8.0)
+
+- Filtre de dépense par compte et sous-compte de financement inspiré de `Diuxx/todo`.
+- Solde disponible (prévu / réel) par revenu, avec indication des valeurs négatives.
+- Épargne annuelle par type de revenu, avec barres prévues/réelles compactes.
+- Ajout du module pur `src/scripts/core/budget-insights.js` et de tests métier spécifiques.
+- Aucune migration du JSON v4 ; les projets, la connexion Google, Drive et l'import/export restent inchangés.
+
+**Note de calcul :** un virement interne est un revenu lié à un autre, pas un revenu externe supplémentaire ; une dépense d'épargne ne doit pas être saisie une seconde fois pour le même virement si l'on veut éviter une représentation double. La somme « épargne annuelle par type » porte uniquement sur les types de revenus marqués comme épargne.
+
+## Changement v0.8.5
+
+Le réglage de marge minimale mensuelle, la colonne « Objectif minimal » de la vue annuelle et la ligne de seuil dans le graphique sont retirés. La marge disponible reste calculée comme avant. Une ancienne propriété `minMargin` présente dans une sauvegarde v4 reste acceptée sans être utilisée, ce qui évite une migration destructrice et permettra éventuellement une réintégration ultérieure. Les nouveaux mois n'ont plus cette propriété.
+
+
+## v0.8.5 — Mise en page centrée et compacte
+
+Toutes les vues utilisent désormais un conteneur commun de largeur maximale **1240 px**, centré par `margin-inline: auto`. Les marges latérales diminuent automatiquement sur tablette et mobile. Le tableau de bord conserve trois colonnes à partir de **1200 px de largeur d'écran**, deux entre **881 et 1199 px**, puis une seule sur mobile. Les CSS concernés se trouvent dans `src/styles/compact.css` ; aucune donnée budgétaire ou API n'est modifiée.
+
+
+## Correction v0.8.5 — Vue annuelle
+
+- Séparation verticale des quatre cartes de synthèse et de la carte du graphique avec `margin-bottom: var(--card-gap)`.
+- Les cartes gardent une hauteur naturelle, même lorsque les montants se répartissent sur plusieurs lignes.
+- Grille conservée : quatre colonnes sur grand écran, deux colonnes sous 1190 px et une colonne sur mobile.
+- Aucune modification des calculs, du stockage local ni de la synchronisation Drive.
+
+
+## Remise à zéro et format JSON (v0.8.5)
+
+Dans **Paramètres → Données et sauvegardes**, deux téléchargements sont disponibles :
+
+- `marge-modele-import-v4.json` : budget vierge, prêt à être importé, contenant les catégories et types de revenus initiaux ainsi qu’un compte principal.
+- `marge-budget-v4.schema.json` : schéma JSON Schema Draft 2020-12 décrivant le format d’échange. Des exemplaires sont fournis dans `src/assets/schemas/`.
+
+Les imports utilisent **ce schéma** avant les validations métier (identifiants uniques, dates calendaires, comptes et financements cohérents). Les sauvegardes des versions 1 à 3 sont toujours acceptées via le convertisseur historique, puis contrôlées selon la v4. Les erreurs affichent le chemin du champ concerné.
+
+**Réinitialiser toutes mes données** exige la saisie du mot `EFFACER`. Par défaut, seule cette application dans le navigateur est remise à zéro ; les anciennes copies locales sont également supprimées pour empêcher une restauration automatique. La case optionnelle Drive réinitialise aussi le JSON distant **avec contrôle de version**. Sur un conflit 409 ou un échec d’écriture, rien n’est supprimé localement. Cela ne supprime pas physiquement le fichier Drive (il est remplacé par un budget vierge), ni ne révoque la connexion Google. Il est conseillé d’exporter les données avant toute suppression.

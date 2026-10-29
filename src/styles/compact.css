@@ -7,15 +7,21 @@
   --card-padding: 14px;
 }
 
-.app-shell { max-width: 1760px; padding-inline: 22px; }
-.topbar { min-height: 67px; padding: 10px 0 13px; gap: 14px; flex-wrap: nowrap; }
+/* Cadre commun à toutes les vues : centré sur grand écran, fluide ailleurs. */
+.app-shell {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: clamp(12px, 1.8vw, 22px);
+}
+.topbar { min-height: 56px; padding: 8px 0 10px; gap: 14px; flex-wrap: nowrap; }
 .brand { gap: 9px; }
-.brand-mark { width: 34px; height: 34px; font-size: 23px; border-radius: 11px; }
+.brand-mark { display: block; width: 34px; height: 34px; flex-shrink: 0; background: #153D32; border-radius: 8px; }
 .brand-word { font-size: 20px; }
-.top-nav { gap: 2px; padding: 3px; min-width: 0; }
-.top-nav .nav-link { --wa-color-neutral-on-quiet: var(--muted); }
-.top-nav wa-button.nav-link::part(base) { height: 31px; padding: 0 10px; border-radius: 999px; font-size: 11px; min-width: 0; color: var(--muted); }
-.top-nav wa-button.nav-link::part(button) { font-size: 11px; padding: 0 9px; }
+.top-nav { gap: 3px; padding: 3px; min-width: 0; }
+.top-nav .nav-link { --wa-color-neutral-on-quiet: var(--muted); padding: 0; }
+.top-nav wa-button.nav-link::part(base) { height: 35px; padding: 0 12px; border-radius: 999px; font-size: 12px; min-width: 0; color: var(--muted); }
+.top-nav wa-button.nav-link::part(button) { height: 34px; min-height: 34px; font-size: 12px; padding: 0 11px; }
 .top-nav wa-button.nav-link.active::part(base),
 .top-nav wa-button.nav-link.active::part(button) { color: #11231a; background: var(--accent); font-weight: 700; }
 .top-nav wa-button.nav-link:not(.active):hover::part(button) { color: var(--text); background: #2a3b36; }
@@ -165,6 +171,21 @@ wa-select:not(:defined)::before { content: 'Chargement…'; font-size: 10px; pad
 wa-option:not(:defined) { display: none; }
 wa-input:not(:defined),wa-textarea:not(:defined),wa-dialog:not(:defined) { display: none; }
 
+/* À 1200–1400 px, main.css basculait le dashboard en deux colonnes.
+   Rétablir trois colonnes ici puisque le contenu reste dans un cadre de 1240 px. */
+@media (min-width: 1200px) {
+  .topbar { flex-wrap: nowrap; }
+  .top-nav { order: 0; width: auto; justify-content: center; }
+  .dashboard-grid { grid-template-columns: 1.18fr .92fr 1.08fr; }
+  .dashboard-grid .summary-panel { grid-column: 1; }
+  .dashboard-grid .chart-panel { grid-column: 2 / 4; }
+  .dashboard-grid .donut-panel { grid-column: 1; }
+  .dashboard-grid .activity-panel { grid-column: 2; }
+  .dashboard-grid .recent-panel { grid-column: 3; }
+  .dashboard-grid .accounts-panel { grid-column: 1; }
+  .dashboard-grid .projects-panel { grid-column: 2 / 4; }
+}
+
 @media (max-width: 1190px) {
   .topbar { flex-wrap: wrap; }
   .top-nav { order: 3; width: 100%; justify-content: center; }
@@ -189,7 +210,7 @@ wa-input:not(:defined),wa-textarea:not(:defined),wa-dialog:not(:defined) { displ
   .topbar { padding: 9px 0; gap: 10px; }
   .header-actions { gap: 4px; }
   .top-nav { justify-content: flex-start; }
-  .top-nav wa-button.nav-link::part(button) { font-size: 10px; padding-inline: 8px; }
+  .top-nav wa-button.nav-link::part(button) { font-size: 11px; padding-inline: 9px; }
   .welcome-row { margin-bottom: 12px; gap: 10px; }
   .section-heading h1 { font-size: 24px; }
   .period-actions { width: 100%; }
@@ -213,17 +234,14 @@ wa-input:not(:defined),wa-textarea:not(:defined),wa-dialog:not(:defined) { displ
 .margin-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 .margin-grid-line { stroke: var(--line); stroke-width: 1; opacity: .8; }
 .margin-zero-line { stroke: #769388; stroke-width: 1.4; }
-.margin-threshold-line { stroke: #eacb8b; stroke-width: 1.5; stroke-dasharray: 5 5; opacity: .9; }
 .margin-area { fill: url(#margin-area-fill); }
 .margin-path { fill: none; stroke: var(--sage); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .margin-point { fill: #1c2425; stroke: var(--sage); stroke-width: 2.8; cursor: help; transition: r .15s ease; }
-.margin-point.below-goal { stroke: #eacb8b; }
 .margin-point.negative { stroke: #ffa4a4; }
 .margin-point:hover, .margin-point:focus-visible { r: 7; outline: none; stroke-width: 3.5; }
 .margin-chart-legend { display: flex; flex-wrap: wrap; gap: 13px; align-items: center; justify-content: center; margin: 0 0 4px; color: var(--muted); font-size: 10px; }
 .margin-chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .margin-legend-line { display: inline-block; width: 18px; border-top: 3px solid var(--sage); border-radius: 4px; }
-.margin-legend-goal { display: inline-block; width: 18px; border-top: 2px dashed #eacb8b; }
 
 /* Courbes revenus/dépenses : proportions conservées, libellés jamais étirés. */
 .chart-panel .income-expense-chart { overflow-x: auto; overflow-y: hidden; }
@@ -241,3 +259,4 @@ wa-input:not(:defined),wa-textarea:not(:defined),wa-dialog:not(:defined) { displ
 @media (max-width: 590px) {
   .chart-panel .income-expense-chart svg { min-width: 510px; height: 147px; }
 }
+

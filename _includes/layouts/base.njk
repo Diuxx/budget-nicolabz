@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101517">
+  <meta name="theme-color" content="#153D32">
   <meta name="description" content="{{ site.description }}">
   <title>{{ site.name }} — Budget personnel</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/brand/pecule.svg">
   {# Web Awesome 3.14, Web Components chargés à la demande ; pas de bundler frontend. #}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/styles/themes/default.css">
   <script type="module" src="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/webawesome.loader.js"></script>
   <link rel="stylesheet" href="./styles/main.css">
   <link rel="stylesheet" href="./styles/webawesome.css">
   <link rel="stylesheet" href="./styles/compact.css">
+  <link rel="stylesheet" href="./styles/period-budget.css">
   <script type="module" src="./scripts/ui/app.js"></script>
 </head>
 <body>
@@ -28,6 +30,17 @@
       <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-sync-choice="cancel">Annuler</wa-button>
       <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-sync-choice="remote">Garder Google Drive</wa-button>
       <wa-button type="button" size="s" appearance="filled" variant="danger" data-sync-choice="local">Garder mon navigateur</wa-button>
+    </div>
+  </wa-dialog>
+  <wa-dialog id="resetDialog" label="Réinitialiser les données de Pécule" class="reset-dialog">
+    <p>Cette opération supprime les budgets mensuels, comptes personnalisés, projets, archives et anciennes sauvegardes locales. Elle ne conserve que les <strong>types de revenus et catégories par défaut</strong>, avec un compte principal vierge.</p>
+    <p><strong>Conseil :</strong> exportez votre budget avant de continuer. Cette suppression est irréversible sans sauvegarde.</p>
+    <wa-checkbox id="resetDriveChoice">Réinitialiser aussi ma sauvegarde Google Drive (si connecté)</wa-checkbox>
+    <p class="reset-hint">Par défaut, seul ce navigateur est réinitialisé. Sans cette option, les anciennes données peuvent être rechargées depuis Drive lors d'une synchronisation ultérieure.</p>
+    <wa-input id="resetConfirmation" size="s" label="Saisissez EFFACER pour confirmer" autocomplete="off" placeholder="EFFACER"></wa-input>
+    <div class="reset-actions">
+      <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-action="reset-cancel">Annuler</wa-button>
+      <wa-button id="confirmFullReset" type="button" size="s" variant="danger" data-action="reset-confirm" disabled>Effacer les données</wa-button>
     </div>
   </wa-dialog>
   <div id="toast" role="status" aria-live="polite"></div>

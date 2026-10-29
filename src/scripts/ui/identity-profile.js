@@ -62,16 +62,12 @@ export function renderIdentityProfile(root, { session, checking = false, error =
 
   showItem(root, '#profileLogin', !authenticated && !checking);
   showItem(root, '#profileDriveConnect', authenticated && !driveConnected);
-  showItem(root, '#profileSync', driveConnected);
+  showItem(root, '#profileSync', authenticated);
+  showItem(root, '#profileLogoutDivider', authenticated);
   showItem(root, '#profileLogout', authenticated);
   showItem(root, '#profileRefresh', !checking);
 
-  const cloudButton = root.querySelector('#driveTopButton');
-  if (cloudButton) {
-    cloudButton.title = driveConnected ? 'Synchroniser les données dans Google Drive'
-      : authenticated ? 'Autoriser l’accès à Google Drive' : 'Se connecter à Google';
-    cloudButton.setAttribute('aria-label', cloudButton.title);
-  }
+
 }
 
 /** Empêche qu'un résultat de session incomplet soit affiché comme une connexion valide. */

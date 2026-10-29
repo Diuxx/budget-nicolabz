@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <title>Pécule — un écureuil et sa pièce</title>
+  <rect width="128" height="128" rx="30" fill="#153D32"/>
+  <!-- Queue enroulée, silhouette large pour les petites tailles. -->
+  <path d="M65 96C37 105 17 90 17 65C17 46 27 33 41 33C55 33 63 44 59 56C56 66 45 70 37 62C36 77 52 79 64 71Z" fill="#F4AE78"/>
+  <path d="M30 55C28 43 45 39 49 50" stroke="#FFD2A7" stroke-width="6" stroke-linecap="round"/>
+  <!-- Corps et tête, avec deux petites oreilles. -->
+  <path d="M52 99C43 87 47 72 58 64L64 53C60 45 62 36 69 31L69 19C69 16 72 15 74 18L84 29L91 24C94 22 96 24 95 28L93 39C100 43 102 49 109 51C112 52 111 57 108 60C103 65 94 66 87 62L82 73C88 85 83 98 76 103H57Z" fill="#F4AE78"/>
+  <path d="M62 77C71 68 82 76 80 88C79 95 73 100 64 100C56 94 55 84 62 77Z" fill="#FFD2A7"/>
+  <path d="M57 103H82" stroke="#F4AE78" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="87" cy="45" r="3.5" fill="#153D32"/>
+  <path d="M107 51L111 52L108 56Z" fill="#153D32"/>
+  <!-- Pièce tenue entre les pattes. -->
+  <circle cx="94" cy="78" r="15" fill="#F6CE73" stroke="#153D32" stroke-width="4"/>
+  <path d="M94 71V85" stroke="#B58238" stroke-width="3" stroke-linecap="round"/>
+  <path d="M76 73L84 78M78 90L86 86" stroke="#F4AE78" stroke-width="8" stroke-linecap="round"/>
+</svg>

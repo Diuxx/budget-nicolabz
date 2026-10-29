@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nicolabz.dev/schemas/marge-budget-v4.schema.json",
+  "title": "Marge — Sauvegarde de budget v4",
+  "description": "Patron public des imports/exports JSON de Marge. Les champs d’archives facultatifs sont acceptés.",
+  "type": "object",
+  "required": [
+    "version",
+    "periods",
+    "accounts",
+    "incomeTypes",
+    "expenseCategories",
+    "projects",
+    "legacyTransactions"
+  ],
+  "properties": {
+    "version": {
+      "const": 4
+    },
+    "periods": {
+      "type": "array",
+      "maxItems": 12000,
+      "items": {
+        "$ref": "#/$defs/period"
+      }
+    },
+    "accounts": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "$ref": "#/$defs/account"
+      }
+    },
+    "incomeTypes": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "$ref": "#/$defs/incomeType"
+      }
+    },
+    "expenseCategories": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "$ref": "#/$defs/category"
+      }
+    },
+    "projects": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "$ref": "#/$defs/project"
+      }
+    },
+    "legacyTransactions": {
+      "type": "array"
+    }
+  },
+  "$defs": {
+    "account": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
+    },
+    "incomeType": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "saving"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "saving": {
+          "type": "boolean"
+        }
+      }
+    },
+    "category": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
+    },
+    "income": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "accountId",
+        "plannedAmount",
+        "realAmount",
+        "plannedDate",
+        "realDate",
+        "typeId",
+        "deductedFromIncomeId"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "accountId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "plannedAmount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "realAmount": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "plannedDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+        },
+        "realDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "typeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "deductedFromIncomeId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 120
+        }
+      }
+    },
+    "expense": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "accountId",
+        "plannedAmount",
+        "realAmount",
+        "plannedDate",
+        "realDate",
+        "type",
+        "categoryId",
+        "incomeId",
+        "note"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "accountId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "plannedAmount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "realAmount": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "plannedDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+        },
+        "realDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+        },
+        "type": {
+          "enum": [
+            "fixed",
+            "variable",
+            "savings"
+          ]
+        },
+        "categoryId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "incomeId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    },
+    "period": {
+      "type": "object",
+      "required": [
+        "date",
+        "incomes",
+        "expenses"
+      ],
+      "properties": {
+        "date": {
+          "type": "string",
+          "pattern": "^[1-9]\\d{3}-(0[1-9]|1[0-2])$"
+        },
+        "incomes": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "$ref": "#/$defs/income"
+          }
+        },
+        "expenses": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "$ref": "#/$defs/expense"
+          }
+        },
+        "minMargin": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "description",
+        "type",
+        "target",
+        "saved"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "type": {
+          "enum": [
+            "savings",
+            "financing"
+          ]
+        },
+        "target": {
+          "type": "number",
+          "minimum": 0
+        },
+        "saved": {
+          "type": "number",
+          "minimum": 0
+        },
+        "loanAmount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "loanPayment": {
+          "type": "number",
+          "minimum": 0
+        },
+        "loanMonths": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

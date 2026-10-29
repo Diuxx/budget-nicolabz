@@ -1,27 +1,21 @@
 <header class="topbar">
-  <a class="brand" href="#dashboard" aria-label="Marge, accueil">
-    <span class="brand-mark" aria-hidden="true">m<span>.</span></span>
+  <a class="brand" href="#dashboard" aria-label="Pécule, accueil">
+    <img class="brand-mark" src="./assets/brand/pecule.svg" width="34" height="34" alt="" aria-hidden="true">
     <span class="brand-word">{{ site.name }}</span>
   </a>
   <nav class="top-nav" aria-label="Navigation principale">
     <wa-button type="button" appearance="plain" size="s" class="nav-link active" data-view="dashboard">Tableau de bord</wa-button>
     <wa-button type="button" appearance="plain" size="s" class="nav-link" data-view="budget">Budget</wa-button>
     <wa-button type="button" appearance="plain" size="s" class="nav-link" data-view="analytics">Analyses</wa-button>
-    <wa-button type="button" appearance="plain" size="s" class="nav-link" data-view="transactions">Transactions</wa-button>
+    <wa-button type="button" appearance="plain" size="s" class="nav-link" data-view="transactions">Journal</wa-button>
     <wa-button type="button" appearance="plain" size="s" class="nav-link" data-view="projects">Projets</wa-button>
     <wa-button type="button" appearance="plain" size="s" class="nav-link" data-view="accounts">Comptes</wa-button>
     <wa-button type="button" appearance="plain" size="s" class="nav-link" data-view="settings">Paramètres</wa-button>
   </nav>
   <div class="header-actions">
     <span id="saveIndicator" class="save-state" title="État du compte et de la sauvegarde"><span class="save-dot"></span><span id="connection-status" role="status" aria-live="polite">Vérification…</span></span>
-    <wa-tooltip for="driveTopButton">Synchroniser avec Google Drive</wa-tooltip>
-    <wa-button id="driveTopButton" type="button" class="header-wa-button" appearance="outlined" variant="neutral" data-action="drive-sync" aria-label="Synchroniser avec Google Drive" title="Synchroniser avec Google Drive">
-      <wa-icon name="cloud-arrow-up" label="Cloud"></wa-icon>
-    </wa-button>
-    <wa-button type="button" class="header-wa-button" appearance="outlined" variant="neutral" data-action="import" aria-label="Importer un fichier JSON" title="Importer"><wa-icon name="file-arrow-up" label="Importer"></wa-icon></wa-button>
-    <wa-button type="button" class="header-wa-button" appearance="outlined" variant="neutral" data-action="export" aria-label="Exporter les données" title="Exporter"><wa-icon name="file-arrow-down" label="Exporter"></wa-icon></wa-button>
     <wa-dropdown id="profileMenu" placement="bottom-end" distance="8">
-      <wa-button slot="trigger" id="profileButton" type="button" appearance="plain" class="profile-trigger" aria-label="Compte Google et synchronisation" title="Compte Google">
+      <wa-button slot="trigger" id="profileButton" type="button" appearance="plain" class="profile-trigger" aria-label="Menu utilisateur et sauvegardes" title="Menu utilisateur">
         <wa-avatar id="profileAvatar" shape="circle" initials="?" label="Connexion en cours"></wa-avatar>
       </wa-button>
       <div class="profile-menu-heading">
@@ -30,12 +24,15 @@
         <span id="profileDriveState">Connexion en cours</span>
       </div>
       <wa-divider></wa-divider>
-      <wa-dropdown-item id="profileLogin" value="auth-login"><wa-icon name="right-to-bracket" slot="icon"></wa-icon>Connexion Google</wa-dropdown-item>
-      <wa-dropdown-item id="profileDriveConnect" value="auth-drive"><wa-icon name="cloud" slot="icon"></wa-icon>Autoriser Google Drive</wa-dropdown-item>
-      <wa-dropdown-item id="profileSync" value="drive-sync"><wa-icon name="arrows-rotate" slot="icon"></wa-icon>Synchroniser le budget</wa-dropdown-item>
-      <wa-dropdown-item id="profileRefresh" value="auth-refresh"><wa-icon name="arrows-rotate" slot="icon"></wa-icon>Actualiser la connexion</wa-dropdown-item>
+      <wa-dropdown-item id="profileImport" value="import"><wa-icon name="file-arrow-up" slot="icon"></wa-icon>Importer un fichier JSON</wa-dropdown-item>
+      <wa-dropdown-item id="profileExport" value="export"><wa-icon name="file-arrow-down" slot="icon"></wa-icon>Exporter une sauvegarde</wa-dropdown-item>
+      <wa-dropdown-item id="profileSync" value="drive-sync" hidden><wa-icon name="arrows-rotate" slot="icon"></wa-icon>Synchroniser le budget</wa-dropdown-item>
       <wa-divider></wa-divider>
-      <wa-dropdown-item id="profileLogout" value="auth-logout"><wa-icon name="right-from-bracket" slot="icon"></wa-icon>Se déconnecter</wa-dropdown-item>
+      <wa-dropdown-item id="profileLogin" value="auth-login"><wa-icon name="right-to-bracket" slot="icon"></wa-icon>Connexion Google</wa-dropdown-item>
+      <wa-dropdown-item id="profileDriveConnect" value="auth-drive" hidden><wa-icon name="cloud" slot="icon"></wa-icon>Autoriser Google Drive</wa-dropdown-item>
+      <wa-dropdown-item id="profileRefresh" value="auth-refresh"><wa-icon name="arrows-rotate" slot="icon"></wa-icon>Actualiser la connexion</wa-dropdown-item>
+      <wa-divider id="profileLogoutDivider" hidden></wa-divider>
+      <wa-dropdown-item id="profileLogout" value="auth-logout" hidden><wa-icon name="right-from-bracket" slot="icon"></wa-icon>Se déconnecter</wa-dropdown-item>
     </wa-dropdown>
   </div>
 </header>

@@ -1,0 +1,119 @@
+/* Le budget par période reprend les couleurs et contrôles de Marge. */
+.period-empty { max-width: 720px; padding: 32px; margin: 32px auto; text-align: center; }
+.period-empty h2 { font-size: 23px; margin: 16px 0 8px; letter-spacing: -.03em; }
+.period-empty p { color: var(--muted); line-height: 1.6; }
+.period-empty-icon { display: inline-flex; padding: 14px; background: var(--surface-raised); color: var(--sage); border-radius: 14px; }
+.inline-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.period-empty .inline-actions { justify-content: center; margin-top: 22px; }
+.copy-choice { display: inline-flex; gap: 9px; align-items: center; margin: 15px 0 3px; font-size: 13px; }
+.copy-choice input { accent-color: var(--sage); width: 16px; height: 16px; }
+/* La grille des KPI doit se terminer avant le graphique, quelle que soit
+   la hauteur calculée des cartes ou le nombre de colonnes responsive. */
+.period-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--card-gap);
+  margin-bottom: var(--card-gap);
+  align-items: stretch;
+}
+.period-metric { padding: 15px; min-width: 0; }
+.metric-heading { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; margin-bottom: 13px; }
+.metric-values { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.metric-values > div { display: grid; gap: 4px; min-width: 0; max-width: 100%; }
+.metric-values small { color: var(--muted); font-size: 10px; }
+.metric-values strong { font-size: clamp(17px,1.6vw,23px); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.metric-values > div:last-child strong { color: var(--sage); }
+.recording-note { color: var(--muted); font-size: 11px; margin: 10px 0 20px; }
+.overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--card-gap); }
+.overview-panel { padding: 16px; margin-bottom: 12px; }
+.overview-panel .panel-title { margin-bottom: 12px; }
+.account-summary-row,.pending-row { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+.account-summary-row:last-child,.pending-row:last-child { border-bottom: 0; }
+.account-summary-row > div:first-child,.pending-row > div:first-child { flex: 1; }
+.account-summary-row > div:not(:first-child) { text-align: right; }
+.account-summary-row small,.pending-row small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+.project-overview { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+.project-overview strong,.project-overview small { display: block; font-size: 12px; margin-bottom: 8px; }
+.project-overview small { color: var(--muted); }
+#fundingFilter { width: min(330px, 100%); }
+.ledger-panel { margin-bottom: 16px; overflow: hidden; }
+.ledger-panel > .panel-title { padding: 13px 16px; margin: 0; border-bottom: 1px solid var(--line); }
+.ledger-empty { padding: 22px 16px; color: var(--muted); font-size: 12px; }
+.period-table { min-width: 760px; }
+.data-table small { display: block; color: var(--muted); font-size: 10px; margin-top: 5px; max-width: 260px; white-space: normal; }
+.period-table td { vertical-align: middle; padding-block: 12px; }
+.period-table td:first-child strong { font-size: 12px; }
+.period-table td.align-right { font-variant-numeric: tabular-nums; }
+.ledger-account th { background: var(--surface-soft); color: var(--sage); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.entry-tag { font-size: 10px; color: var(--sage); }
+.entry-actions { display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
+.unrecorded { color: var(--muted); font-size: 11px; font-weight: 400; }
+.warning { color: var(--warning); }
+.migration-note { border-left: 2px solid var(--sage); padding: 8px 12px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.year-bars { height: 170px; display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 10px; margin: 22px 0 10px; }
+.year-bar-month { display: flex; flex-direction: column; gap: 9px; padding: 0; color: var(--muted); background: transparent; border: 0; min-width: 0; }
+.year-bar-track { display: flex; height: 140px; width: 100%; align-items: flex-end; justify-content: center; gap: 4px; border-bottom: 1px solid var(--line); }
+.year-bar-track > span:not(.year-bar-missing) { width: 28%; min-height: 1px; border-radius: 4px 4px 0 0; }
+.year-bar-income { background: var(--accent); }.year-bar-outflow { background: #628c74; }.year-bar-missing { align-self: center; color: var(--line); }
+.year-bar-month small { width: 100%; text-align: center; font-size: 10px; }
+.reference-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--card-gap); margin-bottom: 16px; }
+.reference-panel { padding: 16px; }
+.reference-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); padding: 7px 0; font-size: 12px; }
+.reference-row:last-child { border-bottom: 0; }.reference-row > div { display: flex; gap: 6px; }
+.archive-panel { padding: 16px; margin-top: 18px; }.archive-panel summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+.demo-tools { margin-top: 24px; }.drive-panel { margin-top: 0; }
+wa-dialog#modal { --width: min(570px,calc(100vw - 28px)); }
+.modal-form .form-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.modal-form .form-fields > :first-child,.modal-form wa-textarea { grid-column: 1 / -1; }
+.modal-form .form-control { min-width: 0; }
+.modal-copy { margin-top: 15px; }
+@media(max-width:1190px){.period-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}.metric-values strong{font-size:21px;}}
+@media(max-width:880px){.overview-grid{grid-template-columns:1fr;}.project-overview{grid-template-columns:1fr;gap:16px;}.reference-grid{grid-template-columns:1fr;}.view-toolbar{gap:12px;}}
+@media(max-width:590px){.period-metrics{grid-template-columns:1fr;}.period-metric{padding:13px;}.metric-heading{margin-bottom:9px;}.period-empty{padding:22px 16px;margin:16px auto;}.period-empty h2{font-size:20px;}.modal-form .form-fields{grid-template-columns:1fr;}.year-bars{gap:4px;}.year-bar-month small{font-size:8px;}.account-summary-row{gap:8px;font-size:11px;}#fundingFilter{width:100%;}.view-toolbar>.inline-actions{width:100%;justify-content:space-between;}}
+
+/* Extension 0.8.1 : ventilation par source et épargne annuelle, dans la grille compacte. */
+.filter-context { font-size: 10px; color: var(--muted); font-weight: 400; }
+.annual-saving-panel { padding: 16px; margin-bottom: 16px; }
+.annual-saving-panel .help-note { margin: 0 0 14px; }
+.annual-savings-list { display: grid; gap: 12px; }
+.annual-saving-row { display: grid; grid-template-columns: minmax(130px, .65fr) minmax(0, 2fr); gap: 14px; align-items: center; border-top: 1px solid var(--line); padding-top: 11px; }
+.annual-saving-title strong, .annual-saving-title small { display:block; font-size: 12px; }
+.annual-saving-title small { color: var(--muted); font-size: 10px; margin-top: 4px; }
+.annual-saving-bars { display: grid; gap: 6px; }
+.annual-saving-line { display:grid; grid-template-columns: 42px minmax(0,1fr) 95px; align-items:center; gap: 10px; font-size: 10px; }
+.annual-saving-line strong { font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
+.annual-saving-line wa-progress-bar { --height: 7px; --track-color: var(--art); --indicator-color: var(--sage); }
+.annual-saving-line wa-progress-bar.actual-savings { --indicator-color: #658f7b; }
+@media(max-width:590px) { .annual-saving-row { grid-template-columns: 1fr; gap: 8px; } .filter-context { display: none; } }
+
+/* Réinitialisation volontaire, isolée de la sauvegarde Google Drive. */
+.reset-tools { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.reset-tools h3 { margin: 0 0 6px; font-size: 14px; }
+.reset-tools p { margin: 0 0 10px; }
+wa-dialog.reset-dialog { --width: min(540px, calc(100vw - 28px)); --spacing: 16px; }
+wa-dialog.reset-dialog p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+wa-dialog.reset-dialog p strong { color: var(--text); }
+wa-dialog.reset-dialog wa-checkbox { display: block; margin: 14px 0 4px; }
+wa-dialog.reset-dialog .reset-hint { font-size: 12px; margin: 0 0 14px; }
+.reset-actions { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:18px; }
+
+/* Dates facultatives : disclosure natif accessible au clavier. */
+.modal-form .form-options { margin-top: 14px; }
+.modal-form .form-options summary { width: fit-content; cursor: pointer; color: var(--muted); font-size: 12px; padding: 4px 0; }
+.modal-form .form-options summary:hover { color: var(--sage); }
+.modal-form .form-options summary:focus-visible { outline: 2px solid var(--sage); outline-offset: 4px; border-radius: 3px; }
+.modal-form .form-option-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin-top: 12px; }
+@media(max-width:590px) { .modal-form .form-option-fields { grid-template-columns: 1fr; } }
+
+/* Une ligne dédiée à l'origine laisse les deux montants côte à côte. */
+.modal-form #f-deductedFromIncomeId { grid-column: 1 / -1; }
+/* Le fond et les dimensions appartiennent au bouton interne Web Awesome. */
+.modal-form wa-button.btn,
+.modal-form wa-button.btn:hover { background: transparent; border: 0; padding: 0; min-height: unset; }
+.modal-form wa-button.btn::part(button) { min-height: 32px; }
+.modal-form wa-button.btn.primary::part(button) { background: var(--accent); color: #14251d; border-color: var(--accent); }
+.modal-form wa-button.btn.secondary::part(button) { background: #263330; color: var(--text); border-color: var(--line); }
+.modal-form wa-button.btn.primary:hover::part(button) { background: #ecfff0; }
+.modal-form wa-button.btn.secondary:hover::part(button) { background: #374b43; }
+
+.modal-form.record-form .form-fields > :first-child { grid-column: auto; }

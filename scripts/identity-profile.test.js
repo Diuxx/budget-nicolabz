@@ -7,7 +7,7 @@ function createDom() {
   const selectors = [
     '#profileAvatar', '#saveIndicator', '#connection-status', '#profileName', '#profileEmail',
     '#profileDriveState', '#profileLogin', '#profileDriveConnect', '#profileSync',
-    '#profileLogout', '#profileRefresh', '#driveTopButton',
+    '#profileLogout', '#profileRefresh', '#profileLogoutDivider', '#profileImport', '#profileExport',
   ];
   for (const selector of selectors) {
     const attrs = new Map();
@@ -77,4 +77,20 @@ test('La photo ne peut provenir que d’une URL HTTPS', () => {
   const {root,get}=createDom();
   renderIdentityProfile(root, {session:{...googlePayload,user:{...googlePayload.user,picture:'javascript:alert(1)'}}});
   assert.equal(get('#profileAvatar').getAttribute('image'), undefined);
+});
+
+test('le menu conserve import/export et réserve la synchronisation aux utilisateurs connectés', () => {
+  const {root,get}=createDom();
+  for(const session of [
+    {authenticated:false,user:null,driveConnected:false},
+    {...googlePayload,driveConnected:false},
+    googlePayload,
+    {authenticated:false,user:null,driveConnected:false},
+  ]) {
+    renderIdentityProfile(root,{session});
+    assert.equal(get('#profileImport').hidden,false);
+    assert.equal(get('#profileExport').hidden,false);
+    assert.equal(get('#profileSync').hidden,!session.authenticated);
+    assert.equal(get('#profileLogoutDivider').hidden,!session.authenticated);
+  }
 });

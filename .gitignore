@@ -6,5 +6,6 @@ dist/
 *prive*.json
 *privé*.json
 marge-budget-*.json
+!src/assets/schemas/marge-budget-v4.schema.json
 .DS_Store
 *excel*.json

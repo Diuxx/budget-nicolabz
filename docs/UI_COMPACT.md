@@ -1,4 +1,4 @@
-# Marge. — UI compacte (V5)
+# Marge. — UI compacte (v0.8.3)
 
 ## Objectif
 
@@ -26,8 +26,8 @@ La grande grille annuelle conserve des `input` HTML : la multiplication des Web 
 
 ## Écrans
 
-- Desktop ≥1191px : 3 colonnes, sections sur trois rangées, aperçu des 4 dernières transactions du mois.
-- Tablette 881–1190px : 2 colonnes, navigation en seconde ligne.
+- Desktop ≥1200px : 3 colonnes, sections sur trois rangées, aperçu des 4 dernières transactions du mois.
+- Tablette 881–1199px : 2 colonnes, navigation en seconde ligne.
 - Mobile ≤880px : 1 colonne, composants compacts mais touchables ; défilement normal.
 
 ## Accessibilité et gestion des données
@@ -36,4 +36,8 @@ Chaque bouton icône porte un nom accessible. Les contrôles ont des labels ; le
 
 ## Retouches V5
 
-Les champs Web Awesome utilisent une bordure intérieure sauge au focus, sans ombre/anneau externe. Les actions et liens conservent un indicateur de focus clavier. La courbe de marge annuelle est un SVG responsive à 12 points avec seuil/axe zéro, sans bibliothèque tierce. Les valeurs exactes figurent dans les infobulles SVG et la description accessible du graphique.
+Les champs Web Awesome utilisent une bordure intérieure sauge au focus, sans ombre/anneau externe. Les actions et liens conservent un indicateur de focus clavier. La courbe de marge annuelle est un SVG responsive à 12 points avec axe zéro, sans bibliothèque tierce. Les valeurs exactes figurent dans les infobulles SVG et la description accessible du graphique.
+
+## Retouches v0.8.3 : conteneur centré
+
+La classe `.app-shell` enveloppe l’en-tête, le contenu principal et le pied de page. Elle utilise `max-width: 1240px`, `width: 100%` et `margin-inline: auto`. Les paddings horizontaux restent fluides (`clamp(12px, 1.8vw, 22px)`). Le tableau de bord reprend trois colonnes sur les écrans d’au moins 1200 px, malgré l’ancien breakpoint à 1400 px défini dans `main.css`, pour préserver la densité recherchée. Les autres vues restent dans le même conteneur.

@@ -16,6 +16,6 @@ if not exist "node_modules\@11ty\eleventy" (
     exit /b 1
   )
 )
-echo Tableau de bord : http://localhost:8080
+echo Tableau de bord : http://localhost:8081
 call npm run dev
 pause

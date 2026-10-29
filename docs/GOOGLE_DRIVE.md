@@ -32,7 +32,7 @@ Renseigner les variables **côté serveur** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_S
 
 ```dotenv
 PUBLIC_BASE_URL=http://localhost:3000
-CLIENT_APPS_JSON=[{"id":"budget","origins":["http://localhost:8080"]}]
+CLIENT_APPS_JSON=[{"id":"budget","origins":["http://localhost:8081"]}]
 ```
 
 Conserver les entrées `todo`, etc. si elles sont utilisées. Vérifier `GET http://localhost:3000/health` et `http://localhost:3000/demo` (test d'auth seulement). Les callbacks Google Cloud de l'API sont **`/auth/google/callback` et `/auth/drive/callback` sur l'origine de l'API**, jamais l'URL de Marge.
@@ -44,7 +44,7 @@ npm install
 npm run dev
 ```
 
-Ouvrir `http://localhost:8080`, cliquer sur l'avatar (coin supérieur droit), puis **Connexion Google**. Une fois revenu sur Marge, **Autoriser Google Drive**, puis **Synchroniser**.
+Ouvrir `http://localhost:8081`, cliquer sur l'avatar (coin supérieur droit), puis **Connexion Google**. Une fois revenu sur Marge, **Autoriser Google Drive**, puis **Synchroniser**.
 
 La première sauvegarde est créée explicitement. Sur un autre appareil, en l'absence d'une ancre locale, Marge te demande si tu souhaites conserver le budget local ou récupérer le budget Drive ; elle ne supprime rien automatiquement.
 

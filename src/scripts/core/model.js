@@ -5,15 +5,9 @@ export const GROUPS = [
   { id: 'fixed', label: 'Charges fixes', icon: 'house' },
   { id: 'variable', label: 'Dépenses variables', icon: 'wallet' },
 ];
-export const SETTINGS = [
-  { key:'salaryTarget', label:'Salaire cible', hint:'Projection de septembre à décembre 2026', unit:'€' },
-  { key:'pelMinimum', label:'Versement PEL', hint:'Projection de septembre 2026', unit:'€' },
-  { key:'livretTarget', label:'Objectif Livret A', hint:'Repère sans déduction supplémentaire', unit:'€' },
-  { key:'peaTarget', label:'Objectif PEA', hint:'Repère sans déduction supplémentaire', unit:'€' },
-  { key:'loanPayment', label:'Mensualité de crédit', hint:'Projection d’octobre à décembre 2026', unit:'€' },
-  { key:'minMargin', label:'Marge minimale souhaitée', hint:'Seuil d’alerte du reste disponible', unit:'€' },
-  { key:'loanAmount', label:'Montant initial du prêt', hint:'Information', unit:'€' },
-  { key:'loanMonths', label:'Durée du prêt', hint:'Information', unit:'mois' },
+export const PROJECT_TYPES = [
+  {value:'savings',label:'Épargne'},
+  {value:'financing',label:'Demande de financement'},
 ];
 export const round = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 export const euro = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(Number(n)||0);
@@ -33,7 +27,7 @@ export function monthlyBudget(data, year, month) {
     expenses: round(totals.fixed + totals.variable),
     allocated: round(totals.savings + totals.fixed + totals.variable),
     cashflow: round(totals.income - totals.savings - totals.fixed - totals.variable),
-    threshold: Number(data.settings.minMargin)||0,
+    threshold: data.years[year].minMargins?.[month] ?? (Number(data.settings.minMargin)||0),
   };
 }
 export function annualBudget(data,year) {
@@ -75,18 +69,18 @@ export function createDemoData() {
     ['2026-09-25','Achats divers','Divers',-43.90,null],['2026-09-06','Essence','Transport',-55,null],
   ];
   return {
-    version:2, importedFromExcel:false,
-    settings:{salaryTarget:3200,pelMinimum:200,livretTarget:350,peaTarget:150,loanPayment:205,minMargin:300,loanAmount:4600,loanMonths:24},
-    years:{'2026':{lines:createLines('2026')},'2027':{lines:createLines('2027')}},
+    version:3, importedFromExcel:false,
+    settings:{},
+    years:{'2026':{lines:createLines('2026'),minMargins:Array(12).fill(300)},'2027':{lines:createLines('2027'),minMargins:Array(12).fill(300)}},
     accounts:[
       {id:'demo-a1',name:'N26',type:'Compte courant',balances:{'2026':MONTHS.map((_,i)=>round(480+i*23)),'2027':blankYearBalances()}},
       {id:'demo-a2',name:'Livret A',type:'Épargne',balances:{'2026':MONTHS.map((_,i)=>round(2100+i*180)),'2027':blankYearBalances()}},
       {id:'demo-a3',name:'Compte commun',type:'Compte partagé',balances:{'2026':MONTHS.map((_,i)=>round(620-i*8)),'2027':blankYearBalances()}},
     ],
     projects:[
-      {id:'demo-p1',name:'Moto CB125R',description:'Mon prochain deux-roues',target:4600,saved:1850},
-      {id:'demo-p2',name:'Épargne sécurité',description:'Constituer un fonds de secours',target:5000,saved:2350},
-      {id:'demo-p3',name:'PC / Setup',description:'Améliorer mon espace de travail',target:2000,saved:650},
+      {id:'demo-p1',type:'savings',name:'Moto CB125R',description:'Mon prochain deux-roues',target:4600,saved:1850},
+      {id:'demo-p2',type:'savings',name:'Épargne sécurité',description:'Constituer un fonds de secours',target:5000,saved:2350},
+      {id:'demo-p3',type:'savings',name:'PC / Setup',description:'Améliorer mon espace de travail',target:2000,saved:650},
     ],
     transactions:transactionSeeds.map(([date,label,category,amount,accountId],i)=>({id:`demo-t${i}`,date,label,category,amount,accountId})),
   };
@@ -103,4 +97,46 @@ export function migrateLegacyData(legacy) {
     projects:total>0?[{id:'legacy-moto',name:'Moto CB125R',description:'Budget du projet issu de votre classeur Excel',target:total,saved:0}]:[],
     transactions:[],
   };
+}
+
+export function adjacentMonth(year, month, direction) {
+  const index=Number(year)*12+month+direction;
+  const nextYear=Math.floor(index/12);
+  if(!Number.isInteger(index)||nextYear<1000||nextYear>9999)throw new Error('Année hors limites.');
+  return {year:String(nextYear),month:index%12};
+}
+export function ensureBudgetYear(data, year, sourceYear, sourceMonth) {
+  if(Object.hasOwn(data.years,year))return false;
+  if(!/^[1-9]\d{3}$/.test(year))throw new Error('Année invalide.');
+  const source=data.years[sourceYear];
+  if(!source)throw new Error('Année de référence absente.');
+  data.years[year]={
+    lines:source.lines.map(line=>({...structuredClone(line),id:id(),amounts:Array(12).fill(null),links:{}})),
+    minMargins:Array(12).fill(source.minMargins[sourceMonth]),
+  };
+  for(const account of data.accounts)account.balances[year]??=blankYearBalances();
+  return true;
+}
+
+export function carryPreviousMonth(data, year, month) {
+  const target=data.years[year];
+  if(target.carriedMonths?.includes(month)||target.lines.some(line=>line.amounts[month]!==null))return false;
+  const previous=adjacentMonth(year,month,-1),source=data.years[previous.year];
+  if(!source||!source.lines.some(line=>line.amounts[previous.month]!==null))return false;
+  if(previous.year===year){
+    for(const line of target.lines)line.amounts[month]=line.amounts[previous.month];
+  }else{
+    // Match repeated labels in order without merging distinct budget lines.
+    const available=[...source.lines];
+    for(const line of target.lines){
+      const index=available.findIndex(item=>item.label===line.label&&item.group===line.group&&item.type===line.type);
+      if(index>=0)line.amounts[month]=available.splice(index,1)[0].amounts[previous.month];
+    }
+    for(const line of available){
+      const copy={...structuredClone(line),id:id(),amounts:Array(12).fill(null),links:{}};
+      copy.amounts[month]=line.amounts[previous.month];target.lines.push(copy);
+    }
+  }
+  (target.carriedMonths??=[]).push(month);
+  return true;
 }
