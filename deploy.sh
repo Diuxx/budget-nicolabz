@@ -72,7 +72,8 @@ fi
 
 if [ "$CONFIGURE_NGINX" = "1" ]; then
   echo "Configuration Nginx pour $DOMAIN..."
-  command -v nginx >/dev/null || { echo "nginx est requis." >&2; exit 1; }
+  # nginx est dans /usr/sbin, absent du PATH d'un utilisateur normal : on teste via sudo.
+  sudo sh -c 'command -v nginx' >/dev/null || { echo "nginx est requis." >&2; exit 1; }
   WRITE_NGINX=1
   if [ -e "$NGINX_AVAILABLE" ]; then
     if sudo grep -q "server_name $DOMAIN;" "$NGINX_AVAILABLE" && sudo grep -q "ssl_certificate" "$NGINX_AVAILABLE"; then
@@ -133,7 +134,7 @@ fi
 [ "$CONFIGURE_NGINX" != "1" ] || sudo systemctl reload nginx
 
 if [ "$REQUEST_SSL" = "1" ]; then
-  command -v certbot >/dev/null || { echo "certbot est requis (sudo apt install certbot python3-certbot-nginx)." >&2; exit 1; }
+  sudo sh -c 'command -v certbot' >/dev/null || { echo "certbot est requis (sudo apt install certbot python3-certbot-nginx)." >&2; exit 1; }
   echo "Demande du certificat SSL pour $DOMAIN..."
   if [ -n "$CERTBOT_EMAIL" ]; then
     sudo certbot --nginx -d "$DOMAIN" --redirect --keep-until-expiring --non-interactive --agree-tos -m "$CERTBOT_EMAIL"

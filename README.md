@@ -37,6 +37,31 @@ npm run build
 
 Le site est disponible sur `http://localhost:8081` ; le build statique est produit dans `dist/`. `lancer.bat` et `lancer.sh` sont également fournis. Le budget fonctionne localement sans connexion Google. Les tests couvrent les calculs, copies de mois, migrations, validations, parcours d'interface et synchronisation simulée.
 
+## Déploiement (Nginx + HTTPS)
+
+[deploy.sh](deploy.sh) installe les dépendances, lance les tests, construit le site et le publie dans `/var/www/pecule` (releases + lien `current`, sans coupure). Prérequis serveur : Node.js 20+, npm, rsync, nginx et, pour le HTTPS, certbot (`sudo apt install certbot python3-certbot-nginx`). Le DNS du domaine doit pointer vers le serveur, ports 80 et 443 ouverts.
+
+```bash
+# Premier déploiement : configuration Nginx + certificat SSL
+bash deploy.sh --domain=pecule.exemple.fr --email=moi@exemple.fr --ssl
+
+# Mises à jour : rebuild et resynchronisation de la release actuelle (Nginx inchangé)
+bash deploy.sh
+
+# Nouvelle release (les anciennes restent dans /var/www/pecule/releases pour un retour arrière)
+bash deploy.sh --release
+```
+
+| Option | Effet |
+| --- | --- |
+| `--domain=…` | Domaine du site (ou variable `DOMAIN`) |
+| `--email=…` | Email Let's Encrypt (ou variable `CERTBOT_EMAIL`) |
+| `--nginx` | Génère la configuration Nginx (sauvegarde `.bak` de l'existante) |
+| `--ssl` | Implique `--nginx`, puis demande le certificat avec certbot |
+| `--release` | Crée une nouvelle release au lieu de mettre à jour l'actuelle |
+
+Une configuration Nginx déjà en HTTPS pour le domaine est conservée. Le renouvellement du certificat est géré par certbot (`sudo certbot renew --dry-run` pour tester). Pensez à ajouter l'URL HTTPS du site aux `origins` de `CLIENT_APPS_JSON` (voir ci-dessous).
+
 ## Intégration avec Nicolabz Identity
 
 1. Dans le dépôt de l'API, définir dans `.env` le `CLIENT_APPS_JSON` suivant (en conservant les autres applications déjà déclarées) :
