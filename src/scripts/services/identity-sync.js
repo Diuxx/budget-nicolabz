@@ -37,8 +37,8 @@ export function decideIdentitySync({ anchor, remoteVersion, localDigest, remoteD
 }
 
 /**
- * Appelle la même API que les autres applications nicolabz (namespace « budget »).
- * Les fichiers Drive restent gérés par nodjs-google-auth, pas par Marge.
+ * Appelle la même API que les autres applications nicolabz (namespace « pecule »).
+ * Les fichiers Drive restent gérés par nodjs-google-auth, pas par Pécule.
  */
 export async function synchronizeIdentity({ api, userId, getData, setData, choose, storage, mode = 'auto' }) {
   if (!userId) throw new Error('Une session Google valide est nécessaire.');
@@ -49,7 +49,7 @@ export async function synchronizeIdentity({ api, userId, getData, setData, choos
 
   if (remote.data === null) {
     if (remote.version !== 0) throw new Error('Réponse Drive incohérente.');
-    const choice = await choose({ type: 'empty', message: 'Aucune sauvegarde Marge sur Google Drive. Envoyer les données de ce navigateur ?' });
+    const choice = await choose({ type: 'empty', message: 'Aucune sauvegarde Pécule sur Google Drive. Envoyer les données de ce navigateur ?' });
     if (choice !== 'local') return 'cancel';
     const saved = await api.saveBudget(0, localData);
     writeAnchor(storage, api.appId, userId, saved.version, localDigest);

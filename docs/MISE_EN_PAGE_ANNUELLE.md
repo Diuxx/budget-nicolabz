@@ -1,4 +1,4 @@
-# Correction d'affichage — Marge v0.8.4
+# Correction d'affichage — Pécule v0.8.4
 
 La grille `.period-metrics` dans l'onglet Analytics ne prévoyait pas de séparation extérieure avant le panneau « Revenus et sorties prévus ».
 

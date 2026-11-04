@@ -1,4 +1,4 @@
-# Marge. — UI compacte (v0.8.3)
+# Pécule. — UI compacte (v0.8.3)
 
 ## Objectif
 

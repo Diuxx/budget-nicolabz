@@ -1,4 +1,4 @@
-/* Le budget par période reprend les couleurs et contrôles de Marge. */
+/* Le budget par période reprend les couleurs et contrôles de Pécule. */
 .period-empty { max-width: 720px; padding: 32px; margin: 32px auto; text-align: center; }
 .period-empty h2 { font-size: 23px; margin: 16px 0 8px; letter-spacing: -.03em; }
 .period-empty p { color: var(--muted); line-height: 1.6; }

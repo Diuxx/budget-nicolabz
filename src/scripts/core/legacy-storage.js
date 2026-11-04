@@ -107,7 +107,7 @@ export function exportData(data) {
   const url=URL.createObjectURL(blob);
   const link=document.createElement('a');
   link.href=url;
-  link.download=`marge-budget-${new Date().toISOString().slice(0,10)}.json`;
+  link.download=`pecule-budget-${new Date().toISOString().slice(0,10)}.json`;
   document.body.append(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),300);
 }

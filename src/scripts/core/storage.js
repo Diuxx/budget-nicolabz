@@ -93,9 +93,9 @@ export function downloadJSON(data,name){
   const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}));
   const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),300);
 }
-export function exportData(data){downloadJSON(validateData(data),`marge-budget-${new Date().toISOString().slice(0,10)}.json`);}
-export function exportImportTemplate(){downloadJSON(validateData(createEmptyBudget()),'marge-modele-import-v4.json');}
-export function exportImportSchema(){downloadJSON(BUDGET_SCHEMA,'marge-budget-v4.schema.json');}
+export function exportData(data){downloadJSON(validateData(data),`pecule-budget-${new Date().toISOString().slice(0,10)}.json`);}
+export function exportImportTemplate(){downloadJSON(validateData(createEmptyBudget()),'pecule-modele-import-v4.json');}
+export function exportImportSchema(){downloadJSON(BUDGET_SCHEMA,'pecule-budget-v4.schema.json');}
 
 /** Efface les anciennes sauvegardes pour empêcher leur migration après une remise à zéro.
  * Ne jamais appeler localStorage.clear() : d'autres outils peuvent partager l'origine.
@@ -105,14 +105,14 @@ export function resetLocalData(storage=localStorage, empty=createEmptyBudget()) 
   const keys=[];
   for(let i=0;i<storage.length;i++){
     const key=storage.key(i);
-    if(key&&key!=='marge:budget:v4'&&(key.startsWith('marge:budget:')||key.startsWith('marge:backup:')||key.startsWith('marge:identity:anchor:v1:budget:')||key==='marge:selected-period'||key==='budget-personnel:v1'))keys.push(key);
+    if(key&&key!=='marge:budget:v4'&&(key.startsWith('marge:budget:')||key.startsWith('marge:backup:')||key.startsWith('marge:identity:anchor:v1:pecule:')||key.startsWith('marge:identity:anchor:v1:budget:')||key==='marge:selected-period'||key==='budget-personnel:v1'))keys.push(key);
   }
   // Écrire le budget vierge avant de supprimer les anciennes copies.
   storage.setItem('marge:budget:v4',JSON.stringify(clean));
   keys.forEach(key=>storage.removeItem(key));
   return clean;
 }
-export function exportOriginalBackup(){const raw=localStorage.getItem(BACKUP_KEY)||localStorage.getItem(OLD_KEY);if(!raw)throw new Error('Aucune ancienne sauvegarde locale.');downloadJSON(JSON.parse(raw),'marge-avant-refonte.json');}
+export function exportOriginalBackup(){const raw=localStorage.getItem(BACKUP_KEY)||localStorage.getItem(OLD_KEY);if(!raw)throw new Error('Aucune ancienne sauvegarde locale.');downloadJSON(JSON.parse(raw),'pecule-avant-refonte.json');}
 export async function readImport(file){
   assert(file&&file.size<=5*1024*1024&&file.name.toLowerCase().endsWith('.json'),'Sélectionnez un fichier JSON de moins de 5 Mo.');
   let data;try{data=JSON.parse(await file.text());}catch{throw new Error('JSON illisible.');}return normalizeImport(data);

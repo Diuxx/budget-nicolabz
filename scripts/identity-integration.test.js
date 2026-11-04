@@ -11,7 +11,7 @@ test('Avatar et menu Web Awesome pour le compte Google',()=>{
   assert.match(header,/Se déconnecter/);
   assert.match(app,/sessionState.user/);
 });
-test('Marge ne charge plus Google Identity Services ou les anciens modules Drive',()=>{
+test('Pécule ne charge plus Google Identity Services ou les anciens modules Drive',()=>{
   assert.doesNotMatch(layout,/accounts\.google\.com\/gsi\/client/);
   assert.doesNotMatch(app,/google-auth\.js|drive-api\.js|cloud-sync\.js/);
   assert.match(app,/synchronizeIdentity/);

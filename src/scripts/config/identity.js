@@ -1,5 +1,5 @@
 /**
- * Configuration publique du client statique Marge.
+ * Configuration publique du client statique Pécule.
  * Le Client ID/secret Google, les jetons et le chiffrement restent sur l'API Node.
  * En local, utiliser localhost pour les deux services (jamais 127.0.0.1).
  */

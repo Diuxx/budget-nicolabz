@@ -44,7 +44,7 @@ export function createIdentityController({model,connection,identityApi,syncChoic
       } catch(error) {
         // Une indisponibilité de l’API ne prouve pas que Google a déconnecté l'utilisateur.
         identityError=error.message;
-        console.error('[Marge] Échec de vérification de session Nicolabz Identity :', error);
+        console.error('[Pécule] Échec de vérification de session Nicolabz Identity :', error);
       } finally {
         identityChecking=false;
         sessionRefreshPromise=null;

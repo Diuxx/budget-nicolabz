@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://nicolabz.dev/schemas/marge-budget-v4.schema.json",
-  "title": "Marge — Sauvegarde de budget v4",
-  "description": "Patron public des imports/exports JSON de Marge. Les champs d’archives facultatifs sont acceptés.",
+  "$id": "https://nicolabz.dev/schemas/pecule-budget-v4.schema.json",
+  "title": "Pécule — Sauvegarde de budget v4",
+  "description": "Patron public des imports/exports JSON de Pécule. Les champs d’archives facultatifs sont acceptés.",
   "type": "object",
   "required": [
     "version",

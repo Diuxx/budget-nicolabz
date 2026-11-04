@@ -1,4 +1,4 @@
-# Adaptation des principes Budget de Diuxx/todo à Marge
+# Adaptation des principes Budget de Diuxx/todo à Pécule
 
 Référence étudiée : `Diuxx/todo`, branche `develop`, dossier `web-app/src/app/features/budget/` et modèle/service dans `web-app/src/app/shared/`.
 
@@ -12,7 +12,7 @@ Référence étudiée : `Diuxx/todo`, branche `develop`, dossier `web-app/src/ap
 
 ## Apports de cette version 0.8.1
 
-| Mécanisme Todo | Adaptation Marge |
+| Mécanisme Todo | Adaptation Pécule |
 | --- | --- |
 | Filtre des dépenses par banque et par entrée d'argent | Sélecteur Web Awesome qui propose comptes puis leurs revenus ; filtres distincts (`account:` et `income:`) |
 | Affichage du revenu disponible après déductions | Deux valeurs dans le tableau : disponible prévu et disponible réel ; avertissement visuel si négatif |
@@ -23,7 +23,7 @@ Référence étudiée : `Diuxx/todo`, branche `develop`, dossier `web-app/src/ap
 
 - Version du document JSON **4** : aucune migration des sauvegardes existantes requise.
 - Aucune nouvelle dépendance front-end ; Web Awesome reste utilisé pour les contrôles.
-- Les fonctions de synchronisation et les routes `/api/sync/budget` restent inchangées.
+- Les fonctions de synchronisation et les routes `/api/sync/pecule` restent inchangées.
 - Le code de ton ZIP `marge-v0.8.0.zip` est la base, pas le code de l'ancienne V9.
 
 ## Règles à connaître

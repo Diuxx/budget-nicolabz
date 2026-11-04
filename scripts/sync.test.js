@@ -10,7 +10,7 @@ function memoryStorage() {
 }
 function fakeApi(remote, onWrite=()=>{}) {
   return {
-    appId:'budget',
+    appId:'pecule',
     readBudget:async()=>structuredClone(remote),
     saveBudget:async(version,data)=>{
       onWrite(version,data);
@@ -26,17 +26,17 @@ const params=(api,storage,data,choice=()=>Promise.resolve('cancel'))=>({
 });
 
 test('Nicolabz Identity : URLs de connexion et consentement avec retour contrôlé',()=>{
-  const api=new IdentityApi({baseUrl:'https://auth.nicolabz.dev',appId:'budget',fetchFunction:async()=>{}});
-  const url=new URL(api.loginUrl('https://budget.nicolabz.dev/#dashboard'));
+  const api=new IdentityApi({baseUrl:'https://auth.nicolabz.dev',appId:'pecule',fetchFunction:async()=>{}});
+  const url=new URL(api.loginUrl('https://pecule.nicolabz.dev/#dashboard'));
   assert.equal(url.pathname,'/auth/google/start');
-  assert.equal(url.searchParams.get('app'),'budget');
-  assert.equal(url.searchParams.get('return_to'),'https://budget.nicolabz.dev/#dashboard');
-  assert.equal(new URL(api.driveConsentUrl('https://budget.nicolabz.dev/')).pathname,'/auth/drive/start');
+  assert.equal(url.searchParams.get('app'),'pecule');
+  assert.equal(url.searchParams.get('return_to'),'https://pecule.nicolabz.dev/#dashboard');
+  assert.equal(new URL(api.driveConsentUrl('https://pecule.nicolabz.dev/')).pathname,'/auth/drive/start');
 });
 
 test('Session : cookie HttpOnly envoyé uniquement via credentials, avatar reçu de l’API',async()=>{
   let seen;
-  const api=new IdentityApi({baseUrl:'http://localhost:3000',appId:'budget',fetchFunction:async(url,options)=>{
+  const api=new IdentityApi({baseUrl:'http://localhost:3000',appId:'pecule',fetchFunction:async(url,options)=>{
     seen={url:url.href,...options};
     return new Response(JSON.stringify({authenticated:true,user:{id:'u1',name:'N',email:'n@example.com',picture:'https://example.com/a.png'},driveConnected:true}),{status:200});
   }});
@@ -46,22 +46,22 @@ test('Session : cookie HttpOnly envoyé uniquement via credentials, avatar reçu
   assert.equal(session.user.picture,'https://example.com/a.png');
 });
 
-test('Sauvegarde : PUT versionné dans le namespace budget',async()=>{
+test('Sauvegarde : PUT versionné dans le namespace pecule',async()=>{
   let options;
-  const api=new IdentityApi({baseUrl:'http://localhost:3000',appId:'budget',fetchFunction:async(url,config)=>{
+  const api=new IdentityApi({baseUrl:'http://localhost:3000',appId:'pecule',fetchFunction:async(url,config)=>{
     options={url:url.href,...config};return new Response('{"version":4}',{status:200});
   }});
   await api.saveBudget(3,{hello:'budget'});
   assert.equal(options.method,'PUT');
   assert.deepEqual(JSON.parse(options.body),{version:3,data:{hello:'budget'}});
   assert.equal(options.headers['Content-Type'],'application/json');
-  assert.match(options.url,/\/api\/sync\/budget$/);
+  assert.match(options.url,/\/api\/sync\/pecule$/);
 });
 
 test('Erreurs structurées : 409 et refus d’origine visibles',async()=>{
-  const api=new IdentityApi({baseUrl:'http://localhost:3000',appId:'budget',fetchFunction:async()=>new Response(JSON.stringify({error:{code:'SYNC_CONFLICT',message:'Version périmée'}}),{status:409})});
+  const api=new IdentityApi({baseUrl:'http://localhost:3000',appId:'pecule',fetchFunction:async()=>new Response(JSON.stringify({error:{code:'SYNC_CONFLICT',message:'Version périmée'}}),{status:409})});
   await assert.rejects(api.readBudget(),error=>error.status===409&&error.code==='SYNC_CONFLICT');
-  assert.throws(()=>new IdentityApi({baseUrl:'http://192.168.1.12:3000',appId:'budget'}),/HTTPS/);
+  assert.throws(()=>new IdentityApi({baseUrl:'http://192.168.1.12:3000',appId:'pecule'}),/HTTPS/);
 });
 
 test('Planification : la première synchronisation de deux données différentes requiert un choix',()=>{
@@ -79,7 +79,7 @@ test('Drive vide : création sur confirmation avec version 0',async()=>{
   assert.equal(outcome,'created');
   assert.equal(wrote.version,0);
   assert.equal(remote.version,1);
-  assert.equal(getIdentitySyncInfo({storage,appId:'budget',userId:'userA'}).version,1);
+  assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userA'}).version,1);
 });
 
 test('Deux appareils : téléchargement seulement après consentement si pas de point de référence',async()=>{
@@ -106,19 +106,19 @@ test('Conflit concurrent 409 : pas de réécriture silencieuse',async()=>{
   const api=fakeApi(remote);
   api.saveBudget=async()=>{throw new IdentityApiError('Version changée','SYNC_CONFLICT',409);};
   await assert.rejects(synchronizeIdentity(params(api,storage,local,async()=> 'local')),error=>error.code==='SYNC_CONFLICT');
-  assert.equal(getIdentitySyncInfo({storage,appId:'budget',userId:'userA'}),null);
+  assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userA'}),null);
 });
 
 test('Ancres différentes pour des utilisateurs différents',async()=>{
   const local=createDemoData(),storage=memoryStorage();
   await synchronizeIdentity(params(fakeApi({version:0,data:null}),storage,local,async()=> 'local'));
-  assert.equal(getIdentitySyncInfo({storage,appId:'budget',userId:'userB'}),null);
+  assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userB'}),null);
 });
 
 test('Conservation du budget local : aucune opération API ne supprime localStorage',async()=>{
   const storage=memoryStorage(),local=createDemoData();
   await synchronizeIdentity(params(fakeApi({version:0,data:null}),storage,local,async()=> 'cancel'));
-  assert.equal(getIdentitySyncInfo({storage,appId:'budget',userId:'userA'}),null);
+  assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userA'}),null);
   assert.equal(local.version,4);
 });
 
@@ -136,7 +136,7 @@ test('Régression Chromium : fetch garde le contexte Window et affiche la sessio
       user: { id: 1, name: 'Compte Google', email: 'test@example.com', picture: 'https://example.com/avatar.jpg' },
     }), { status: 200 }));
   }
-  const api = new IdentityApi({ baseUrl: 'http://localhost:3000', appId: 'budget', fetchFunction: browserLikeFetch });
+  const api = new IdentityApi({ baseUrl: 'http://localhost:3000', appId:'pecule', fetchFunction: browserLikeFetch });
   const session = await api.getSession();
   assert.match(actualUrl, /localhost:3000\/api\/session$/);
   assert.equal(session.authenticated, true);
@@ -148,7 +148,7 @@ test('Une erreur réseau préserve la cause pour faciliter le diagnostic', async
   const problem = new TypeError('Failed to fetch');
   const api = new IdentityApi({
     baseUrl: 'http://localhost:3000',
-    appId: 'budget',
+    appId:'pecule',
     fetchFunction() { throw problem; },
   });
   await assert.rejects(api.getSession(), error => {

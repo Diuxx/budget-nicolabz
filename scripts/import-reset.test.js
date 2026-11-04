@@ -16,8 +16,8 @@ function store(initial={}) {
 const demo=()=>createBudgetDemo();
 
 test('le patron v4 livré est conforme au schéma téléchargé et au validateur métier',()=>{
-  const schema=JSON.parse(readFileSync('src/assets/schemas/marge-budget-v4.schema.json','utf8'));
-  const template=JSON.parse(readFileSync('src/assets/schemas/marge-modele-import-v4.json','utf8'));
+  const schema=JSON.parse(readFileSync('src/assets/schemas/pecule-budget-v4.schema.json','utf8'));
+  const template=JSON.parse(readFileSync('src/assets/schemas/pecule-modele-import-v4.json','utf8'));
   assert.deepEqual(schema,BUDGET_SCHEMA);
   assert.deepEqual(template,createEmptyBudget());
   assert.deepEqual(validateData(template),template);
@@ -59,7 +59,7 @@ test('le patron v4 accepte les exports historiques normalisés sans perdre les c
   assert.deepEqual(normalizeImport(data),data);
 });
 
-test('remise à zéro locale : conserve uniquement les références et efface les anciennes clés de Marge',async()=>{
+test('remise à zéro locale : conserve uniquement les références et efface les anciennes clés de Pécule',async()=>{
   const input=demo();input.projects.push({id:'prj',name:'Moto',type:'savings',target:500,saved:100,description:''});
   input.incomeTypes.push({id:'custom',name:'Custom',saving:false});
   input.expenseCategories.push({id:'custom-cat',name:'Custom',icon:'💰'});
@@ -67,19 +67,22 @@ test('remise à zéro locale : conserve uniquement les références et efface le
   const local=store({'marge:budget:v4':JSON.stringify(input),
     'marge:budget:v2':'ancien','marge:backup:before-import:v4':'ancien',
     'marge:backup:before-periods:v4':'ancien','marge:identity:anchor:v1:budget:123':'ancien',
+    'marge:identity:anchor:v1:pecule:123':'ancien','marge:identity:anchor:v1:todo:123':'à préserver',
     'budget-personnel:v1':'ancien', 'marge:selected-period':'2027-06', 'autre-app:data':'à préserver'});
   const {data,driveReset}=await resetBudget({storage:local});
   assert.equal(driveReset,false);
   assert.deepEqual(data,createEmptyBudget());
   assert.deepEqual(JSON.parse(local.getItem('marge:budget:v4')),createEmptyBudget());
   for(const key of ['marge:budget:v2','marge:backup:before-import:v4','marge:backup:before-periods:v4','marge:identity:anchor:v1:budget:123','budget-personnel:v1','marge:selected-period'])assert.equal(local.getItem(key),null,key);
+  assert.equal(local.getItem('marge:identity:anchor:v1:pecule:123'),null);
+  assert.equal(local.getItem('marge:identity:anchor:v1:todo:123'),'à préserver');
   assert.equal(local.getItem('autre-app:data'),'à préserver');
 });
 
 test('Drive : reset versionné sans supprimer local si la sauvegarde échoue',async()=>{
   const local=store({'marge:budget:v4':JSON.stringify(demo())});
   const original=local.getItem('marge:budget:v4');
-  const api={appId:'budget',readBudget:async()=>({version:3,data:demo()}),saveBudget:async()=>{const err=new Error('Conflit');err.code='SYNC_CONFLICT';throw err;}};
+  const api={appId:'pecule',readBudget:async()=>({version:3,data:demo()}),saveBudget:async()=>{const err=new Error('Conflit');err.code='SYNC_CONFLICT';throw err;}};
   await assert.rejects(resetBudget({storage:local,api,userId:7,resetDrive:true}),/Conflit/);
   assert.equal(local.getItem('marge:budget:v4'),original);
 });
@@ -87,7 +90,7 @@ test('Drive : reset versionné sans supprimer local si la sauvegarde échoue',as
 test('Drive : un reset confirmé écrase le JSON distant avec version CAS et réancre la synchro',async()=>{
   const local=store({'marge:budget:v4':JSON.stringify(demo())});
   const remote={version:5,data:demo()};
-  const api={appId:'budget',readBudget:async()=>structuredClone(remote),saveBudget:async(version,data)=>{
+  const api={appId:'pecule',readBudget:async()=>structuredClone(remote),saveBudget:async(version,data)=>{
     assert.equal(version,5);assert.deepEqual(data,createEmptyBudget());
     remote.data=structuredClone(data);return {version:++remote.version};
   }};
@@ -95,7 +98,7 @@ test('Drive : un reset confirmé écrase le JSON distant avec version CAS et ré
   assert.equal(result.driveReset,true);
   assert.deepEqual(result.data,createEmptyBudget());
   assert.deepEqual(remote.data,createEmptyBudget());
-  const anchor=getIdentitySyncInfo({storage:local,appId:'budget',userId:7});
+  const anchor=getIdentitySyncInfo({storage:local,appId:'pecule',userId:7});
   assert.equal(anchor.version,6);
   assert.equal(typeof anchor.digest,'string');
 });

@@ -1,4 +1,4 @@
-/** Schéma public d'échange de Marge v4 (JSON Schema Draft 2020-12).
+/** Schéma public d'échange de Pécule v4 (JSON Schema Draft 2020-12).
  * Les règles relationnelles (liens, dates exactes et unicité des IDs) restent
  * vérifiées par validateData : JSON Schema ne couvre pas ces invariants.
  */
@@ -21,9 +21,9 @@ const line = {
 };
 export const BUDGET_SCHEMA = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
-  $id: 'https://nicolabz.dev/schemas/marge-budget-v4.schema.json',
-  title: 'Marge — Sauvegarde de budget v4',
-  description: 'Patron public des imports/exports JSON de Marge. Les champs d’archives facultatifs sont acceptés.',
+  $id: 'https://nicolabz.dev/schemas/pecule-budget-v4.schema.json',
+  title: 'Pécule — Sauvegarde de budget v4',
+  description: 'Patron public des imports/exports JSON de Pécule. Les champs d’archives facultatifs sont acceptés.',
   type: 'object',
   required: ['version', 'periods', 'accounts', 'incomeTypes', 'expenseCategories', 'projects', 'legacyTransactions'],
   properties: {
@@ -55,7 +55,7 @@ export const BUDGET_SCHEMA = {
         date: { type: 'string', pattern: '^[1-9]\\d{3}-(0[1-9]|1[0-2])$' },
         incomes: { type: 'array', maxItems: 1000, items: { $ref: '#/$defs/income' } },
         expenses: { type: 'array', maxItems: 1000, items: { $ref: '#/$defs/expense' } },
-        minMargin: nonNegative, // ancien champ en lecture seule, non utilisé par Marge
+        minMargin: nonNegative, // ancien champ en lecture seule, non utilisé par Pécule
       },
     },
     project: { ...named, required: ['id','name','description','type','target','saved'], properties: {
