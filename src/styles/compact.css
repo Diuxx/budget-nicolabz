@@ -118,6 +118,7 @@ wa-button.btn::part(base), wa-button.btn::part(button) { min-height: 29px; font-
 .button-secondary:hover { background: var(--color-surface-muted); }
 .button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 .button:disabled { opacity: .45; cursor: not-allowed; }
+.button[hidden] { display: none; }
 .tools-panel .button { width: 100%; justify-content: flex-start; }
 wa-button.btn.small::part(base), wa-button.btn.small::part(button) { min-height: 26px; font-size: 10px; padding-inline: 8px; }
 wa-button.header-wa-button::part(base), wa-button.header-wa-button::part(button) { width: 32px; height: 32px; border-radius: 10px; }
