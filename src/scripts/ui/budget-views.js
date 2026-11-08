@@ -68,7 +68,7 @@ export function createBudgetViews({model,presentation}){
   function entryTable(p,kind){
     const items=filterBudgetEntries(p,kind,model.fundingFilter);
     if(!items.length)return `<p class="ledger-empty">${kind==='income'?'Aucun revenu':'Aucune dépense'} pour ce filtre.</p>`;
-    const groups=model.data.accounts.map(account=>({account,items:items.filter(item=>item.accountId===account.id)})).filter(group=>group.items.length);
+    const groups=(kind==='expense'?[false,true]:[null]).flatMap(recorded=>model.data.accounts.map(account=>({account,items:items.filter(item=>item.accountId===account.id&&(recorded===null||(item.realAmount!==null)===recorded))}))).filter(group=>group.items.length);
     return `<div class="table-scroll"><table class="data-table period-table"><thead><tr><th>Libellé</th><th>${kind==='income'?'Type / origine':'Catégorie / financement'}</th><th class="align-right">Prévu</th><th class="align-right">Réel</th><th class="align-right">${kind==='income'?'Disponible prévu / réel':'Écart réel − prévu'}</th><th>Actions</th></tr></thead><tbody>${groups.map(({account,items})=>`<tr class="ledger-account"><th colspan="6">${esc(account.name)}</th></tr>${items.map(item=>{
       const source=p.incomes.find(income=>income.id===(kind==='income'?item.deductedFromIncomeId:item.incomeId));
       const balance=kind==='income'?fundingBalances(p,item.id):null;

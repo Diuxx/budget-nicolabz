@@ -50,7 +50,8 @@
 .ledger-account th { background: var(--surface-soft); color: var(--sage); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
 .entry-tag { font-size: 10px; color: var(--sage); }
 .entry-actions { display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
-.unrecorded { color: var(--muted); font-size: 11px; font-weight: 400; }
+.unrecorded { color: #b42318; font-size: 11px; font-weight: 700; }
+:root[data-theme="dark"] .unrecorded { color: var(--danger); }
 .warning { color: var(--warning); }
 .migration-note { border-left: 2px solid var(--sage); padding: 8px 12px; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .year-bars { height: 170px; display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 10px; margin: 22px 0 10px; }
