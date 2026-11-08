@@ -103,11 +103,14 @@ server {
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    # Fichiers non hachés : toujours revalider pour servir la dernière version.
-    add_header Cache-Control "no-cache" always;
-
     location / {
         try_files \$uri \$uri/ =404;
+    }
+
+    location ~* \.(?:svg|png|jpg|jpeg|webp|ico|woff2?)\$ {
+        expires 7d;
+        add_header Cache-Control "public";
+        try_files \$uri =404;
     }
 }
 EOF
