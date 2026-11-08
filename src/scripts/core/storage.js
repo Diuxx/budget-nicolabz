@@ -15,6 +15,7 @@ function list(items,label,check,max=1000){
 export function validateData(data) {
   validateAgainstBudgetSchema(data);
   assert(plain(data)&&data.version===BUDGET_SCHEMA.properties.version.const,'Sauvegarde de budget incompatible.');
+  if(data.marginThresholds)assert(data.marginThresholds.warning<data.marginThresholds.positive,'Le seuil vert doit être supérieur au seuil orange.');
   list(data.accounts,'Comptes',item=>assert(text(item.name)&&text(item.type),'Compte invalide.'));
   list(data.incomeTypes,'Types de revenu',item=>assert(text(item.name)&&typeof item.saving==='boolean','Type de revenu invalide.'));
   list(data.expenseCategories,'Catégories',item=>assert(text(item.name),'Catégorie invalide.'));

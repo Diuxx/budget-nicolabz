@@ -111,6 +111,14 @@
 /* Contrôles UI réutilisables dans l'application : tous les selects sont Web Awesome. */
 wa-button.btn::part(base), wa-button.btn::part(button) { min-height: 29px; font-size: 11px; border-radius: 8px; padding-inline: 9px; }
 .reference-panel .button, .button.button-compact { min-height: 29px; padding: 4px 9px; font-size: 11px; line-height: 19px; gap: 8px; }
+.button.button-text { background: transparent; border-color: transparent; color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; }
+.button.button-danger { border-color: currentColor; font-weight: 700; }
+.button:hover { transform: none; }
+.button-primary:hover { filter: brightness(.92); }
+.button-secondary:hover { background: var(--color-surface-muted); }
+.button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.button:disabled { opacity: .45; cursor: not-allowed; }
+.tools-panel .button { width: 100%; justify-content: flex-start; }
 wa-button.btn.small::part(base), wa-button.btn.small::part(button) { min-height: 26px; font-size: 10px; padding-inline: 8px; }
 wa-button.header-wa-button::part(base), wa-button.header-wa-button::part(button) { width: 32px; height: 32px; border-radius: 10px; }
 wa-button.mini-icon { width: 27px; height: 27px; border: 0; background: transparent; }

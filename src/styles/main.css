@@ -152,7 +152,7 @@ svg{flex-shrink:0}
 .empty-state strong{color:var(--text);font-size:13px}
 .empty-state p{font-size:11px;line-height:1.6;max-width:280px;margin:0}
 .footer{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#778b83;font-size:11px;margin-top:40px;padding:22px 0 25px;border-top:1px solid #293831}
-.footer-link{border:0;background:none;color:#b3c0bb;text-decoration:underline;padding:0;font-size:11px}
+.footer-link{border:0;background:none;color:var(--color-text-secondary);text-decoration:underline;padding:0;font-size:11px}
 .view-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 0}
 .muted{color:var(--muted)}.view-toolbar .muted{font-size:12px}
 .segmented{display:inline-flex;background:var(--color-surface-muted);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}

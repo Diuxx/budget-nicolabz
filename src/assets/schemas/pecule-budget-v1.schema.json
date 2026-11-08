@@ -17,6 +17,23 @@
     "version": {
       "const": 1
     },
+    "marginThresholds": {
+      "type": "object",
+      "required": [
+        "warning",
+        "positive"
+      ],
+      "properties": {
+        "warning": {
+          "type": "number",
+          "minimum": 0
+        },
+        "positive": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
     "periods": {
       "type": "array",
       "maxItems": 12000,

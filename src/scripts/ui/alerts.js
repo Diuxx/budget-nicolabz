@@ -11,7 +11,7 @@ export function confirmAction(message){
     for(const [label,value] of [['Annuler',false],['Confirmer',true]]){
       const button=document.createElement('button');
       button.type='button';
-      button.className=`button button-${value?'primary':'secondary'}`;
+      button.className=`button button-${value?'primary':'secondary'} button-compact`;
       button.textContent=label;
       button.addEventListener('click',()=>{
         region.hidden=true;

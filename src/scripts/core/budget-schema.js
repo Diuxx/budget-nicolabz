@@ -28,6 +28,7 @@ export const BUDGET_SCHEMA = {
   required: ['version', 'periods', 'accounts', 'incomeTypes', 'expenseCategories', 'projects', 'legacyTransactions'],
   properties: {
     version: { const: 1 },
+    marginThresholds: { type: 'object', required: ['warning','positive'], properties: { warning: nonNegative, positive: nonNegative } },
     periods: { type: 'array', maxItems: 12000, items: { $ref: '#/$defs/period' } },
     accounts: { type: 'array', maxItems: 1000, items: { $ref: '#/$defs/account' } },
     incomeTypes: { type: 'array', maxItems: 1000, items: { $ref: '#/$defs/incomeType' } },

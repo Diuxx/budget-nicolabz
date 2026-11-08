@@ -39,9 +39,9 @@
   <wa-dialog id="syncChoiceDialog" label="Conflit de synchronisation" class="sync-choice-dialog">
     <p id="syncChoiceText">Les données sont différentes.</p>
     <div class="sync-choice-actions">
-      <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-sync-choice="cancel">Annuler</wa-button>
-      <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-sync-choice="remote">Garder Google Drive</wa-button>
-      <wa-button type="button" size="s" appearance="filled" variant="danger" data-sync-choice="local">Garder mon navigateur</wa-button>
+      <button class="button button-secondary button-compact" type="button" data-sync-choice="cancel">Annuler</button>
+      <button class="button button-secondary button-compact" type="button" data-sync-choice="remote">Garder Google Drive</button>
+      <button class="button button-primary button-compact button-danger" type="button" data-sync-choice="local">Garder mon navigateur</button>
     </div>
   </wa-dialog>
   <wa-dialog id="resetDialog" label="Réinitialiser les données de Pécule" class="reset-dialog">
@@ -51,8 +51,8 @@
     <p class="reset-hint">Par défaut, seul ce navigateur est réinitialisé. Sans cette option, les anciennes données peuvent être rechargées depuis Drive lors d''une synchronisation ultérieure.</p>
     <wa-input id="resetConfirmation" size="s" label="Saisissez EFFACER pour confirmer" autocomplete="off" placeholder="EFFACER"></wa-input>
     <div class="reset-actions">
-      <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-action="reset-cancel">Annuler</wa-button>
-      <wa-button id="confirmFullReset" type="button" size="s" variant="danger" data-action="reset-confirm" disabled>Effacer les données</wa-button>
+      <button class="button button-secondary button-compact" type="button" data-action="reset-cancel">Annuler</button>
+      <button class="button button-primary button-compact button-danger" id="confirmFullReset" type="button" data-action="reset-confirm" disabled>Effacer les données</button>
     </div>
   </wa-dialog>
   <script>

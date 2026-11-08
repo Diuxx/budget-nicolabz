@@ -1,4 +1,5 @@
 import { confirmAction } from './alerts.js';
+import { marginThresholds } from '../core/margin-thresholds.js';
 import { exportExcel } from './excel-export.js';
 import { periodKey, shiftPeriod, createPeriod, deleteIncome, createBudgetDemo } from '../core/period-model.js';
 import { exportData, exportOriginalBackup, exportImportTemplate, exportImportSchema } from '../core/storage.js';
@@ -74,6 +75,13 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
     document.addEventListener('change',event=>{
       const el=event.target;
       try{
+        if(el.dataset?.marginThreshold){
+          const field=el.dataset.marginThreshold;
+          if(!['warning','positive'].includes(field))return;
+          const value=Number(el.value);
+          if(el.value.trim()===''||!Number.isFinite(value)||value<0)throw new Error('Saisissez un seuil positif ou nul.');
+          mutate(()=>{model.data.marginThresholds={...marginThresholds(model.data),[field]:value};});return;
+        }
         if(el.id==='monthSelect'){selectPeriod(periodKey(model.selectedPeriod.slice(0,4),Number(el.value)));return;}
         if(el.id==='yearSelect'){selectPeriod(periodKey(el.value,Number(model.selectedPeriod.slice(5))-1));return;}
         if(el.id==='fundingFilter'){model.fundingFilter=el.value;render();return;}

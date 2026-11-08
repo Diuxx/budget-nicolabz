@@ -35,7 +35,12 @@ export const icon=(name,size=18)=>`<svg width="${size}" height="${size}" viewBox
 export const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
 export const titleRow=(heading,subtitle,action='')=>`<div class="section-heading"><div><h1>${heading}</h1><p>${subtitle}</p></div>${action}</div>`;
-export const btn=(action,label,kind='secondary',other='')=>`<wa-button type="button" appearance="filled" variant="${kind==='primary'?'brand':kind==='danger'?'danger':'neutral'}" class="btn ${kind}" data-action="${action}" ${other}>${label}</wa-button>`;
+export const btn=(action,label,kind='secondary',other='')=>{
+  const variant=kind.split(' ')[0];
+  const appearance=variant==='primary'?'primary':'secondary';
+  const modifier=variant==='text-btn'?' button-text':variant==='danger'?' button-danger':'';
+  return `<button type="button" class="button button-${appearance} button-compact${modifier}" data-action="${action}" ${other}>${label}</button>`;
+};
 export const webIcon=(name,label='')=>`<wa-icon name="${name}" ${label?`label="${esc(label)}"`:'aria-hidden="true"'}></wa-icon>`;
 export const actionIcon=(action,iconName,aria,attrs='')=>`<wa-tooltip for="action-${action}-${esc(attrs.match(/data-id="([^"]+)"/)?.[1]||'global')}">${esc(aria)}</wa-tooltip><wa-button id="action-${action}-${esc(attrs.match(/data-id="([^"]+)"/)?.[1]||'global')}" type="button" size="xs" appearance="outlined" variant="neutral" class="mini-icon" data-action="${action}" aria-label="${esc(aria)}" title="${esc(aria)}" ${attrs}>${webIcon(({plus:'plus',left:'chevron-left',chevron:'chevron-right',edit:'pen',trash:'trash',close:'xmark'})[iconName]||iconName,aria)}</wa-button>`;
 export const empty=(title,text,actionHtml='')=>`<div class="empty-state">${icon('info',24)}<strong>${title}</strong><p>${text}</p>${actionHtml}</div>`;
