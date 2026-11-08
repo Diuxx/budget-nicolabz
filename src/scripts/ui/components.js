@@ -41,3 +41,4 @@ export const actionIcon=(action,iconName,aria,attrs='')=>`<wa-tooltip for="actio
 export const empty=(title,text,actionHtml='')=>`<div class="empty-state">${icon('info',24)}<strong>${title}</strong><p>${text}</p>${actionHtml}</div>`;
 export const formatDate=date=>new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',year:'numeric'}).format(new Date(`${date}T12:00:00`));
 export const optionHtml=(value,label,selected)=>`<wa-option value="${esc(value)}" ${String(value)===String(selected)?'selected':''}>${esc(label)}</wa-option>`;
+

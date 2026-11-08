@@ -110,11 +110,12 @@
 
 /* Contrôles UI réutilisables dans l'application : tous les selects sont Web Awesome. */
 wa-button.btn::part(base), wa-button.btn::part(button) { min-height: 29px; font-size: 11px; border-radius: 8px; padding-inline: 9px; }
+.reference-panel .button, .button.button-compact { min-height: 29px; padding: 4px 9px; font-size: 11px; line-height: 19px; gap: 8px; }
 wa-button.btn.small::part(base), wa-button.btn.small::part(button) { min-height: 26px; font-size: 10px; padding-inline: 8px; }
 wa-button.header-wa-button::part(base), wa-button.header-wa-button::part(button) { width: 32px; height: 32px; border-radius: 10px; }
 wa-button.mini-icon { width: 27px; height: 27px; border: 0; background: transparent; }
-wa-button.mini-icon::part(base), wa-button.mini-icon::part(button) { padding: 0; min-width: 27px; width: 27px; height: 27px; border-radius: 8px; color: var(--sage); }
-wa-button.mini-icon:hover::part(button) { background: #34473d; }
+wa-button.mini-icon::part(base), wa-button.mini-icon::part(button) { padding: 0; min-width: 27px; width: 27px; height: 27px; border-radius: 8px; background: var(--color-surface); border-color: var(--color-border); color: var(--sage); }
+wa-button.mini-icon:hover::part(button) { background: var(--color-surface-muted); }
 wa-button.mini-icon wa-icon { font-size: 12px; }
 wa-tooltip { --max-width: 240px; }
 wa-select { --wa-form-control-background-color: #1e2b29; --wa-form-control-border-color: #42534b; --wa-form-control-border-radius: 9px; --wa-form-control-padding-inline: 10px; }

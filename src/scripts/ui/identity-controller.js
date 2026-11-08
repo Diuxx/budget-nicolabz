@@ -1,3 +1,4 @@
+import { confirmAction } from './alerts.js';
 import { renderIdentityProfile, parseIdentitySession } from './identity-profile.js';
 import { synchronizeIdentity, getIdentitySyncInfo } from '../services/identity-sync.js';
 import { saveData } from '../core/storage.js';
@@ -87,7 +88,7 @@ export function createIdentityController({model,connection,identityApi,syncChoic
     } catch(error) {showToast(`Déconnexion : ${error.message}`,true);}
   }
   async function disconnectDrive() {
-    if (!confirm('Dissocier l’autorisation Drive ? Les fichiers Drive ne seront pas supprimés.')) return;
+    if (!await confirmAction('Dissocier l’autorisation Drive ? Les fichiers Drive ne seront pas supprimés.')) return;
     try {
       await identityApi.disconnectDrive();
       await refreshSession();

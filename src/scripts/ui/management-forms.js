@@ -1,3 +1,4 @@
+import { confirmAction } from './alerts.js';
 import { PROJECT_TYPES } from '../core/model.js';
 import { saveProject, saveAccount, saveReference, prepareReferenceRemoval } from '../core/budget-editing.js';
 
@@ -37,10 +38,10 @@ export function createManagementForms({model,dialog,openForm,mutate}){
       ...(types?[{name:'saving',label:'Nature du montant disponible',type:'select',value:item?.saving?'yes':'no',options:[{value:'no',label:'Disponible pour les dépenses'},{value:'yes',label:'Réservé à l’épargne'}]}]:[])
     ],values=>{saveReference(model.data,kind,item,values);});
   }
-  function deleteReference(kind,key){
+  async function deleteReference(kind,key){
     const {collection,index}=prepareReferenceRemoval(model.data,kind,key);
     if(index<0)return;
-    if(confirm(`Supprimer « ${collection[index].name} » ?`))mutate(()=>collection.splice(index,1));
+    if(await confirmAction(`Supprimer « ${collection[index].name} » ?`))mutate(()=>collection.splice(index,1));
   }
   return {projectForm,accountForm,referenceForm,deleteReference};
 }

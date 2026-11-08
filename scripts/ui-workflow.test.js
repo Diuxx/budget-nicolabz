@@ -16,7 +16,7 @@ test('parcours mensuel : copie, saisie prévu/réel, financement et sauvegarde',
   assert.equal(env.saved().periods.at(-1).expenses.at(-1).plannedAmount,100);
   env.controls.plannedAmount.value='150';env.submit();assert.equal(env.saved().periods.at(-1).expenses.at(-1).plannedAmount,150);
   assert.equal(Object.hasOwn(env.saved().periods.at(-1),'minMargin'),false);
-  env.action('delete-income',next.incomes[0].id);assert.ok(env.toast.textContent.includes('finance encore'));
+  env.action('delete-income',next.incomes[0].id);await new Promise(resolve=>setTimeout(resolve,0));assert.ok(env.toast.textContent.includes('finance encore'));
   env.action('prev-month');assert.equal(env.saved().periods[0].incomes[0].plannedAmount,3200);
 });
 test('un revenu transféré conserve ses liens et refuse les cycles',async()=>{
@@ -70,5 +70,5 @@ test('ouvrir un mois depuis les analyses mémorise la période et réinitialise 
   assert.deepEqual(env.saved(),before);
   env.action('open-period',undefined,{period:'invalide'});
   assert.equal(env.values.get('marge:selected-period'),target);
-  assert.match(env.toast.textContent,/Période invalide/);
+  await new Promise(resolve=>setTimeout(resolve,0));assert.match(env.toast.textContent,/Période invalide/);
 });

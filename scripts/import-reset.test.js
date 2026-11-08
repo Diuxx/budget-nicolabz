@@ -15,9 +15,9 @@ function store(initial={}) {
 }
 const demo=()=>createBudgetDemo();
 
-test('le patron v4 livré est conforme au schéma téléchargé et au validateur métier',()=>{
-  const schema=JSON.parse(readFileSync('src/assets/schemas/pecule-budget-v4.schema.json','utf8'));
-  const template=JSON.parse(readFileSync('src/assets/schemas/pecule-modele-import-v4.json','utf8'));
+test('le patron v1 livré est conforme au schéma téléchargé et au validateur métier',()=>{
+  const schema=JSON.parse(readFileSync('src/assets/schemas/pecule-budget-v1.schema.json','utf8'));
+  const template=JSON.parse(readFileSync('src/assets/schemas/pecule-modele-import-v1.json','utf8'));
   assert.deepEqual(schema,BUDGET_SCHEMA);
   assert.deepEqual(template,createEmptyBudget());
   assert.deepEqual(validateData(template),template);
@@ -53,7 +53,7 @@ test('import : contrôle métier après le schéma (références, dates, doublon
   for(const change of bad){const data=demo();change(data);assert.throws(()=>validateData(data));}
 });
 
-test('le patron v4 accepte les exports historiques normalisés sans perdre les champs optionnels',()=>{
+test('le patron v1 accepte les exports historiques normalisés sans perdre les champs optionnels',()=>{
   const data=demo();data.periods[0].minMargin=2;data.legacyTransactions=[{id:'archives-1',name:'Ancien poste'}];
   data.migration={note:'archive'};
   assert.deepEqual(normalizeImport(data),data);
@@ -64,7 +64,7 @@ test('remise à zéro locale : conserve uniquement les références et efface le
   input.incomeTypes.push({id:'custom',name:'Custom',saving:false});
   input.expenseCategories.push({id:'custom-cat',name:'Custom',icon:'💰'});
   input.legacyTransactions.push({id:'tr',label:'ancien'});
-  const local=store({'marge:budget:v4':JSON.stringify(input),
+  const local=store({'pecule:budget:v1':JSON.stringify(input),
     'marge:budget:v2':'ancien','marge:backup:before-import:v4':'ancien',
     'marge:backup:before-periods:v4':'ancien','marge:identity:anchor:v1:budget:123':'ancien',
     'marge:identity:anchor:v1:pecule:123':'ancien','marge:identity:anchor:v1:todo:123':'à préserver',
@@ -72,7 +72,7 @@ test('remise à zéro locale : conserve uniquement les références et efface le
   const {data,driveReset}=await resetBudget({storage:local});
   assert.equal(driveReset,false);
   assert.deepEqual(data,createEmptyBudget());
-  assert.deepEqual(JSON.parse(local.getItem('marge:budget:v4')),createEmptyBudget());
+  assert.deepEqual(JSON.parse(local.getItem('pecule:budget:v1')),createEmptyBudget());
   for(const key of ['marge:budget:v2','marge:backup:before-import:v4','marge:backup:before-periods:v4','marge:identity:anchor:v1:budget:123','budget-personnel:v1','marge:selected-period'])assert.equal(local.getItem(key),null,key);
   assert.equal(local.getItem('marge:identity:anchor:v1:pecule:123'),null);
   assert.equal(local.getItem('marge:identity:anchor:v1:todo:123'),'à préserver');
@@ -80,15 +80,15 @@ test('remise à zéro locale : conserve uniquement les références et efface le
 });
 
 test('Drive : reset versionné sans supprimer local si la sauvegarde échoue',async()=>{
-  const local=store({'marge:budget:v4':JSON.stringify(demo())});
-  const original=local.getItem('marge:budget:v4');
+  const local=store({'pecule:budget:v1':JSON.stringify(demo())});
+  const original=local.getItem('pecule:budget:v1');
   const api={appId:'pecule',readBudget:async()=>({version:3,data:demo()}),saveBudget:async()=>{const err=new Error('Conflit');err.code='SYNC_CONFLICT';throw err;}};
   await assert.rejects(resetBudget({storage:local,api,userId:7,resetDrive:true}),/Conflit/);
-  assert.equal(local.getItem('marge:budget:v4'),original);
+  assert.equal(local.getItem('pecule:budget:v1'),original);
 });
 
 test('Drive : un reset confirmé écrase le JSON distant avec version CAS et réancre la synchro',async()=>{
-  const local=store({'marge:budget:v4':JSON.stringify(demo())});
+  const local=store({'pecule:budget:v1':JSON.stringify(demo())});
   const remote={version:5,data:demo()};
   const api={appId:'pecule',readBudget:async()=>structuredClone(remote),saveBudget:async(version,data)=>{
     assert.equal(version,5);assert.deepEqual(data,createEmptyBudget());
@@ -104,7 +104,7 @@ test('Drive : un reset confirmé écrase le JSON distant avec version CAS et ré
 });
 
 test('Drive : pas de remise à zéro distante sans session ni API',async()=>{
-  const local=store({'marge:budget:v4':JSON.stringify(demo())});
+  const local=store({'pecule:budget:v1':JSON.stringify(demo())});
   await assert.rejects(resetBudget({storage:local,resetDrive:true}),/Connectez/);
-  assert.equal(JSON.parse(local.getItem('marge:budget:v4')).periods.length,1);
+  assert.equal(JSON.parse(local.getItem('pecule:budget:v1')).periods.length,1);
 });

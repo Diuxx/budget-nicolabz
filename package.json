@@ -7,6 +7,8 @@
     "node": ">=20"
   },
   "scripts": {
+    "prebuild": "node scripts/build-budget-schema.js",
+    "pretest": "node scripts/build-budget-schema.js",
     "dev": "eleventy --serve --port=8081",
     "build": "eleventy",
     "test": "node --test scripts/*.test.js",
@@ -14,5 +16,8 @@
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.1.0"
+  },
+  "dependencies": {
+    "exceljs": "4.4.0"
   }
 }

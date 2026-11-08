@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://nicolabz.dev/schemas/pecule-budget-v4.schema.json",
-  "title": "Pécule — Sauvegarde de budget v4",
+  "$id": "https://nicolabz.dev/schemas/pecule-budget-v1.schema.json",
+  "title": "Pécule — Sauvegarde de budget v1",
   "description": "Patron public des imports/exports JSON de Pécule. Les champs d’archives facultatifs sont acceptés.",
   "type": "object",
   "required": [
@@ -15,7 +15,7 @@
   ],
   "properties": {
     "version": {
-      "const": 4
+      "const": 1
     },
     "periods": {
       "type": "array",

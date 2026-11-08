@@ -2,7 +2,7 @@ import { normalizeImport as normalizeLegacy } from './legacy-storage.js';
 import { createEmptyBudget, periodKey } from './period-model.js';
 import { BUDGET_SCHEMA, validateAgainstBudgetSchema } from './budget-schema.js';
 
-const KEY='marge:budget:v4',OLD_KEY='marge:budget:v2',BACKUP_KEY='marge:backup:before-periods:v4';
+const KEY='pecule:budget:v1',OLD_KEY='marge:budget:v2',BACKUP_KEY='marge:backup:before-periods:v4';
 const assert=(value,message)=>{if(!value)throw new Error(message);};
 const plain=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
 const number=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0;
@@ -14,7 +14,7 @@ function list(items,label,check,max=1000){
 }
 export function validateData(data) {
   validateAgainstBudgetSchema(data);
-  assert(plain(data)&&data.version===4,'Sauvegarde de budget incompatible.');
+  assert(plain(data)&&data.version===BUDGET_SCHEMA.properties.version.const,'Sauvegarde de budget incompatible.');
   list(data.accounts,'Comptes',item=>assert(text(item.name)&&text(item.type),'Compte invalide.'));
   list(data.incomeTypes,'Types de revenu',item=>assert(text(item.name)&&typeof item.saving==='boolean','Type de revenu invalide.'));
   list(data.expenseCategories,'Catégories',item=>assert(text(item.name),'Catégorie invalide.'));
@@ -76,13 +76,14 @@ export function migrateBudget(input) {
 }
 export function normalizeImport(input) {
   assert(plain(input),'Fichier JSON attendu.');
-  if (input.version===4) return validateData(structuredClone(input));
-  assert([1,2,3].includes(input.version),'budget.version : version non reconnue (v1 à v4 acceptées).');
+  if (input.version===1&&Array.isArray(input.periods)) return validateData(structuredClone(input));
+  if (input.version===4&&Array.isArray(input.periods)) return validateData({...structuredClone(input),version:1});
+  assert([1,2,3].includes(input.version),'budget.version : version non reconnue.');
   return migrateBudget(input);
 }
 export function loadData() {
   const current=localStorage.getItem(KEY);if(current)return normalizeImport(JSON.parse(current));
-  const raw=localStorage.getItem(OLD_KEY)||localStorage.getItem('budget-personnel:v1');
+  const raw=localStorage.getItem('marge:budget:v4')||localStorage.getItem(OLD_KEY)||localStorage.getItem('budget-personnel:v1');
   if(!raw)return createEmptyBudget();
   const migrated=normalizeImport(JSON.parse(raw));
   if(!localStorage.getItem(BACKUP_KEY))localStorage.setItem(BACKUP_KEY,raw);
@@ -94,8 +95,8 @@ export function downloadJSON(data,name){
   const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),300);
 }
 export function exportData(data){downloadJSON(validateData(data),`pecule-budget-${new Date().toISOString().slice(0,10)}.json`);}
-export function exportImportTemplate(){downloadJSON(validateData(createEmptyBudget()),'pecule-modele-import-v4.json');}
-export function exportImportSchema(){downloadJSON(BUDGET_SCHEMA,'pecule-budget-v4.schema.json');}
+export function exportImportTemplate(){downloadJSON(validateData(createEmptyBudget()),'pecule-modele-import-v1.json');}
+export function exportImportSchema(){downloadJSON(BUDGET_SCHEMA,'pecule-budget-v1.schema.json');}
 
 /** Efface les anciennes sauvegardes pour empêcher leur migration après une remise à zéro.
  * Ne jamais appeler localStorage.clear() : d'autres outils peuvent partager l'origine.
@@ -105,15 +106,29 @@ export function resetLocalData(storage=localStorage, empty=createEmptyBudget()) 
   const keys=[];
   for(let i=0;i<storage.length;i++){
     const key=storage.key(i);
-    if(key&&key!=='marge:budget:v4'&&(key.startsWith('marge:budget:')||key.startsWith('marge:backup:')||key.startsWith('marge:identity:anchor:v1:pecule:')||key.startsWith('marge:identity:anchor:v1:budget:')||key==='marge:selected-period'||key==='budget-personnel:v1'))keys.push(key);
+    if(key&&key!=='pecule:budget:v1'&&(key==='marge:budget:v4'||key.startsWith('marge:budget:')||key.startsWith('marge:backup:')||key.startsWith('marge:identity:anchor:v1:pecule:')||key.startsWith('marge:identity:anchor:v1:budget:')||key==='marge:selected-period'||key==='budget-personnel:v1'))keys.push(key);
   }
   // Écrire le budget vierge avant de supprimer les anciennes copies.
-  storage.setItem('marge:budget:v4',JSON.stringify(clean));
+  storage.setItem('pecule:budget:v1',JSON.stringify(clean));
   keys.forEach(key=>storage.removeItem(key));
   return clean;
 }
 export function exportOriginalBackup(){const raw=localStorage.getItem(BACKUP_KEY)||localStorage.getItem(OLD_KEY);if(!raw)throw new Error('Aucune ancienne sauvegarde locale.');downloadJSON(JSON.parse(raw),'pecule-avant-refonte.json');}
 export async function readImport(file){
   assert(file&&file.size<=5*1024*1024&&file.name.toLowerCase().endsWith('.json'),'Sélectionnez un fichier JSON de moins de 5 Mo.');
-  let data;try{data=JSON.parse(await file.text());}catch{throw new Error('JSON illisible.');}return normalizeImport(data);
+  let data;try{data=JSON.parse(await file.text());}catch{throw new Error('JSON illisible.');}
+  const imported=normalizeImport(data);
+  const hasAmount=entry=>entry.plannedAmount!==0||(entry.realAmount!==null&&entry.realAmount!==0);
+  for(const period of imported.periods){
+    period.expenses=period.expenses.filter(hasAmount);
+    const incomes=new Map(period.incomes.map(income=>[income.id,income]));
+    const retained=new Set(period.incomes.filter(hasAmount).map(income=>income.id));
+    for(const expense of period.expenses)if(expense.incomeId!==null)retained.add(expense.incomeId);
+    for(const incomeId of retained){
+      const parent=incomes.get(incomeId).deductedFromIncomeId;
+      if(parent!==null)retained.add(parent);
+    }
+    period.incomes=period.incomes.filter(income=>retained.has(income.id));
+  }
+  return validateData(imported);
 }

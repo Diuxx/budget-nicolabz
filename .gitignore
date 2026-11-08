@@ -7,6 +7,6 @@ dist/
 *privé*.json
 marge-budget-*.json
 pecule-budget-*.json
-!src/assets/schemas/pecule-budget-v4.schema.json
+!src/assets/schemas/pecule-budget-v1.schema.json
 .DS_Store
 *excel*.json

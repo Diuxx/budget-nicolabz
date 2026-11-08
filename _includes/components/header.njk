@@ -13,6 +13,10 @@
     <wa-button type="button" appearance="plain" size="s" class="nav-link" data-view="settings">Paramètres</wa-button>
   </nav>
   <div class="header-actions">
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Activer le thème sombre" aria-pressed="false">
+      <span data-theme-icon aria-hidden="true">☾</span>
+      <span data-theme-label>Mode sombre</span>
+    </button>
     <span id="saveIndicator" class="save-state" title="État du compte et de la sauvegarde"><span class="save-dot"></span><span id="connection-status" role="status" aria-live="polite">Vérification…</span></span>
     <wa-dropdown id="profileMenu" placement="bottom-end" distance="8">
       <wa-button slot="trigger" id="profileButton" type="button" appearance="plain" class="profile-trigger" aria-label="Menu utilisateur et sauvegardes" title="Menu utilisateur">
@@ -26,6 +30,7 @@
       <wa-divider></wa-divider>
       <wa-dropdown-item id="profileImport" value="import"><wa-icon name="file-arrow-up" slot="icon"></wa-icon>Importer un fichier JSON</wa-dropdown-item>
       <wa-dropdown-item id="profileExport" value="export"><wa-icon name="file-arrow-down" slot="icon"></wa-icon>Exporter une sauvegarde</wa-dropdown-item>
+      <wa-dropdown-item id="profileExportExcel" value="export-excel"><wa-icon name="file-arrow-down" slot="icon"></wa-icon>Exporter un fichier Excel</wa-dropdown-item>
       <wa-dropdown-item id="profileSync" value="drive-sync" hidden><wa-icon name="arrows-rotate" slot="icon"></wa-icon>Synchroniser le budget</wa-dropdown-item>
       <wa-divider></wa-divider>
       <wa-dropdown-item id="profileLogin" value="auth-login"><wa-icon name="right-to-bracket" slot="icon"></wa-icon>Connexion Google</wa-dropdown-item>

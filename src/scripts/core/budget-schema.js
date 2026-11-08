@@ -1,4 +1,4 @@
-/** Schéma public d'échange de Pécule v4 (JSON Schema Draft 2020-12).
+/** Schéma public d'échange de Pécule v1 (JSON Schema Draft 2020-12).
  * Les règles relationnelles (liens, dates exactes et unicité des IDs) restent
  * vérifiées par validateData : JSON Schema ne couvre pas ces invariants.
  */
@@ -21,13 +21,13 @@ const line = {
 };
 export const BUDGET_SCHEMA = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
-  $id: 'https://nicolabz.dev/schemas/pecule-budget-v4.schema.json',
-  title: 'Pécule — Sauvegarde de budget v4',
+  $id: 'https://nicolabz.dev/schemas/pecule-budget-v1.schema.json',
+  title: 'Pécule — Sauvegarde de budget v1',
   description: 'Patron public des imports/exports JSON de Pécule. Les champs d’archives facultatifs sont acceptés.',
   type: 'object',
   required: ['version', 'periods', 'accounts', 'incomeTypes', 'expenseCategories', 'projects', 'legacyTransactions'],
   properties: {
-    version: { const: 4 },
+    version: { const: 1 },
     periods: { type: 'array', maxItems: 12000, items: { $ref: '#/$defs/period' } },
     accounts: { type: 'array', maxItems: 1000, items: { $ref: '#/$defs/account' } },
     incomeTypes: { type: 'array', maxItems: 1000, items: { $ref: '#/$defs/incomeType' } },

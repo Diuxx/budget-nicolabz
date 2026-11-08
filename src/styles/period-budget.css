@@ -1,5 +1,8 @@
 /* Le budget par période reprend les couleurs et contrôles de Pécule. */
 .period-empty { max-width: 720px; padding: 32px; margin: 32px auto; text-align: center; }
+.dashboard-empty { min-height: inherit; display: flex; flex-direction: column; }
+.dashboard-empty-content { flex: 1; display: grid; place-items: center; padding-block: 24px; }
+.dashboard-empty-content > .period-empty { width: 100%; margin: 0; }
 .period-empty h2 { font-size: 23px; margin: 16px 0 8px; letter-spacing: -.03em; }
 .period-empty p { color: var(--muted); line-height: 1.6; }
 .period-empty-icon { display: inline-flex; padding: 14px; background: var(--surface-raised); color: var(--sage); border-radius: 14px; }
@@ -117,3 +120,41 @@ wa-dialog.reset-dialog .reset-hint { font-size: 12px; margin: 0 0 14px; }
 .modal-form wa-button.btn.secondary:hover::part(button) { background: #374b43; }
 
 .modal-form.record-form .form-fields > :first-child { grid-column: auto; }
+.top-nav { background: var(--color-surface); border-color: var(--color-border); }
+.top-nav wa-button.nav-link.active::part(base),
+.top-nav wa-button.nav-link.active::part(button) { background: var(--color-button); color: var(--color-button-text); }
+.top-nav wa-button.nav-link:not(.active):hover::part(button) { background: var(--color-surface-muted); }
+wa-button.btn,
+wa-button.btn:hover { background: transparent; border: 0; padding: 0; }
+wa-button.btn.primary::part(base),
+wa-button.btn.primary::part(button),
+.modal-form wa-button.btn.primary::part(button),
+.modal-form wa-button.btn.primary:hover::part(button) { background: var(--color-button); color: var(--color-button-text); border-color: var(--color-button); }
+wa-button.btn.secondary::part(base),
+wa-button.btn.secondary::part(button),
+wa-button.btn.quiet::part(base),
+wa-button.btn.quiet::part(button),
+.modal-form wa-button.btn.secondary::part(button) { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border); }
+wa-button.btn.secondary:hover::part(button),
+.modal-form wa-button.btn.secondary:hover::part(button),
+wa-button.mini-icon:hover::part(button) { background: var(--color-surface-muted); }
+wa-button.btn.primary:not(:defined) { background: var(--color-button); color: var(--color-button-text); }
+wa-button.btn.secondary:not(:defined) { background: var(--color-surface); color: var(--color-text); }
+wa-select::part(combobox),
+.period-actions wa-select::part(combobox),
+wa-select::part(listbox),
+wa-input.amount-control::part(base),
+wa-input.form-control::part(base),
+wa-textarea.form-control::part(base),
+wa-dialog::part(dialog) { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border); }
+wa-option { color: var(--color-text); --current-text-color: var(--color-text); }
+wa-option:hover,
+wa-option[aria-selected="true"] { background-color: var(--color-surface-muted); color: var(--color-text); }
+.month-link { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; }
+.month-link:hover { color: var(--color-text); }
+.inline-alert, #toast.visible { padding: 16px; margin-block: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-muted); color: var(--color-text); }
+.inline-alert p { margin-top: 0; }
+.inline-alert .button + .button { margin-left: 8px; }
+#toast { display: none; position: static; max-width: none; opacity: 1; transform: none; transition: none; box-shadow: none; pointer-events: auto; }
+#toast.visible { display: block; }
+#toast.error { background: var(--color-surface-muted); color: var(--color-text); border-color: var(--color-accent); }

@@ -1,12 +1,17 @@
 <!doctype html>
-<html lang="fr" class="wa-dark">
+<html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#153D32">
   <meta name="description" content="{{ site.description }}">
   <title>{{ site.name }} — Budget personnel</title>
   <link rel="icon" type="image/svg+xml" href="./assets/brand/pecule.svg">
+  <script src="./nicolabz/theme.js"></script>
+  <link rel="stylesheet" href="./nicolabz/styles/theme.css">
+  <link rel="stylesheet" href="./nicolabz/styles/typography.css">
+  <link rel="stylesheet" href="./nicolabz/styles/components.css">
   {# Web Awesome 3.14, Web Components chargés à la demande ; pas de bundler frontend. #}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/styles/themes/default.css">
   <script type="module" src="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/webawesome.loader.js"></script>
@@ -17,10 +22,17 @@
   <script type="module" src="./scripts/ui/app.js"></script>
 </head>
 <body>
-  <div class="app-shell">
-    {% include "components/header.njk" %}
-    <main class="main" id="app" tabindex="-1" aria-live="off">{{ content | safe }}</main>
-    {% include "components/footer.njk" %}
+  <div class="page-shell">
+    <div class="spectrum-art" aria-hidden="true">
+      <div class="spectrum-art__shape"></div>
+    </div>
+    <div class="app-shell">
+      {% include "components/header.njk" %}
+      <section id="confirmation" class="inline-alert" role="region" aria-label="Confirmation requise" hidden></section>
+      <div id="toast" role="status" aria-live="polite"></div>
+      <main class="main" id="app" tabindex="-1" aria-live="off">{{ content | safe }}</main>
+      {% include "components/footer.njk" %}
+    </div>
   </div>
   <input type="file" id="importInput" accept=".json,application/json" hidden>
   <wa-dialog id="modal" label="Modifier"></wa-dialog>
@@ -36,13 +48,44 @@
     <p>Cette opération supprime les budgets mensuels, comptes personnalisés, projets, archives et anciennes sauvegardes locales. Elle ne conserve que les <strong>types de revenus et catégories par défaut</strong>, avec un compte principal vierge.</p>
     <p><strong>Conseil :</strong> exportez votre budget avant de continuer. Cette suppression est irréversible sans sauvegarde.</p>
     <wa-checkbox id="resetDriveChoice">Réinitialiser aussi ma sauvegarde Google Drive (si connecté)</wa-checkbox>
-    <p class="reset-hint">Par défaut, seul ce navigateur est réinitialisé. Sans cette option, les anciennes données peuvent être rechargées depuis Drive lors d'une synchronisation ultérieure.</p>
+    <p class="reset-hint">Par défaut, seul ce navigateur est réinitialisé. Sans cette option, les anciennes données peuvent être rechargées depuis Drive lors d''une synchronisation ultérieure.</p>
     <wa-input id="resetConfirmation" size="s" label="Saisissez EFFACER pour confirmer" autocomplete="off" placeholder="EFFACER"></wa-input>
     <div class="reset-actions">
       <wa-button type="button" size="s" appearance="outlined" variant="neutral" data-action="reset-cancel">Annuler</wa-button>
       <wa-button id="confirmFullReset" type="button" size="s" variant="danger" data-action="reset-confirm" disabled>Effacer les données</wa-button>
     </div>
   </wa-dialog>
-  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (function () {
+      if (!window.nicolabzTheme) return;
+      const button = document.querySelector('[data-theme-toggle]');
+      if (!button) return;
+      const icon = button.querySelector('[data-theme-icon]');
+      const label = button.querySelector('[data-theme-label]');
+      function sync(theme) {
+        const isDark = theme === 'dark';
+        button.setAttribute('aria-pressed', String(isDark));
+        if (icon) icon.textContent = isDark ? '☀' : '☾';
+        if (label) label.textContent = isDark ? 'Mode clair' : 'Mode sombre';
+        button.setAttribute('aria-label', isDark ? 'Activer le thème clair' : 'Activer le thème sombre');
+      }
+      if (window.nicolabzTheme.getTheme) {
+        const current = window.nicolabzTheme.getTheme();
+        if (current) sync(current);
+      }
+      button.addEventListener('click', function () {
+        if (!window.nicolabzTheme || !window.nicolabzTheme.toggle) return;
+        window.nicolabzTheme.toggle();
+        if (window.nicolabzTheme.getTheme) {
+          const theme = window.nicolabzTheme.getTheme();
+          if (theme) sync(theme);
+        }
+      });
+      window.addEventListener('nicolabz-theme-change', function (event) {
+        if (!event.detail || !event.detail.theme) return;
+        sync(event.detail.theme);
+      });
+    })();
+  </script>
 </body>
 </html>
