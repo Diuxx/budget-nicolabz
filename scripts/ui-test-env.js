@@ -1,6 +1,6 @@
 import {createBudgetDemo} from '../src/scripts/core/period-model.js';
-export function environment(view='budget',input=createBudgetDemo()){
-  const confirmation={hidden:true,replaceChildren(){},append(element){if(element.textContent==='Confirmer')queueMicrotask(()=>element.click());}};
+export function environment(view='budget',input=createBudgetDemo(),confirmationChoice='Confirmer'){
+  const confirmation={hidden:true,replaceChildren(){},append(element){if(element.textContent===confirmationChoice)queueMicrotask(()=>element.click());}};
   const main={innerHTML:''},toast={textContent:'',className:''},listeners={},controls={};
   const values=new Map([['pecule:budget:v1',JSON.stringify(input)],['marge:selected-period',input.periods[0]?.date||'2028-01']]);
   const generic={addEventListener(){},setAttribute(){},removeAttribute(){},dataset:{},innerHTML:''};

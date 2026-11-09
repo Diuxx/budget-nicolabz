@@ -44,6 +44,7 @@ export function createIdentityController({model,connection,identityApi,syncChoic
       checking: identityChecking,
       error: identityError,
       locallyModified:connection.locallyModified,
+      syncing:connection.busy,
     });
   }
 

@@ -1,6 +1,54 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {environment} from './ui-test-env.js';
-import {shiftPeriod} from '../src/scripts/core/period-model.js';
+import {createBudgetDemo,createPeriod,shiftPeriod} from '../src/scripts/core/period-model.js';
+
+for(const scenario of ['creation','confirmation','annulation']){
+  test(`report du budget : ${scenario}`,async()=>{
+    const data=createBudgetDemo(),source=data.periods[0],nextDate=shiftPeriod(source.date,1);
+    if(scenario!=='creation'){
+      const next=createPeriod(data,nextDate);
+      next.incomes[0].plannedAmount=123;
+      next.incomes[0].realAmount=456;
+    }
+    const env=environment('budget',data,scenario==='annulation'?'Annuler':'Confirmer');
+    await import(`../src/scripts/ui/app.js?carry-budget-${scenario}`);
+    assert.match(env.main.innerHTML,/data-action="carry-budget"/);
+    env.action('carry-budget');
+    await new Promise(resolve=>setImmediate(resolve));
+    if(scenario==='annulation'){
+      assert.deepEqual(env.saved(),data);
+      assert.equal(env.values.get('marge:selected-period'),source.date);
+      return;
+    }
+    const saved=env.saved();
+    assert.equal(saved.periods.length,2);
+    assert.deepEqual(saved.periods[0],source);
+    const target=saved.periods[1];
+    assert.equal(target.date,nextDate);
+    assert.equal(target.incomes[0].plannedAmount,source.incomes[0].plannedAmount);
+    assert.notEqual(target.incomes[0].id,source.incomes[0].id);
+    assert.ok(target.incomes[0].plannedDate.startsWith(nextDate));
+    assert.ok([...target.incomes,...target.expenses].every(item=>item.realAmount===null&&item.realDate===null));
+    assert.equal(target.expenses[0].incomeId,target.incomes[0].id);
+    assert.equal(env.values.get('marge:selected-period'),nextDate);
+  });
+}
+
+test('la duplication crée une ligne non pointée et conserve le financement',async()=>{
+  const env=environment();await import('../src/scripts/ui/app.js?duplicate-entry');
+  const original=env.saved().periods[0];
+  assert.match(env.main.innerHTML,/data-action="duplicate-income"/);
+  assert.match(env.main.innerHTML,/data-action="duplicate-expense"/);
+  env.action('duplicate-income',original.incomes[0].id);
+  env.action('duplicate-expense',original.expenses[0].id);
+  const current=env.saved().periods[0];
+  for(const key of ['incomes','expenses']){
+    const copy=current[key].at(-1),source=original[key][0];
+    assert.notEqual(copy.id,source.id);
+    assert.deepEqual(copy,{...source,id:copy.id,realAmount:null,realDate:null});
+    assert.deepEqual(current[key].slice(0,-1),original[key]);
+  }
+});
 
 test('parcours mensuel : copie, saisie prévu/réel, financement et sauvegarde',async()=>{
   const env=environment();await import('../src/scripts/ui/app.js?workflow-refactor');

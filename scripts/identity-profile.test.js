@@ -55,6 +55,16 @@ test('Une modification locale apparaît comme à synchroniser sans prétendre ê
   assert.match(get('#profileDriveState').textContent, /modifications locales/);
 });
 
+test('La synchronisation affiche la sauvegarde en cours puis rétablit le statut Drive', () => {
+  const {root,get}=createDom();
+  renderIdentityProfile(root,{session:googlePayload,locallyModified:true,syncing:true});
+  assert.equal(get('#saveIndicator').dataset.state,'syncing');
+  assert.equal(get('#connection-status').textContent,'Sauvegarde en cours…');
+  renderIdentityProfile(root,{session:googlePayload});
+  assert.equal(get('#saveIndicator').dataset.state,'connected');
+  assert.equal(get('#connection-status').textContent,'Drive connecté');
+});
+
 test('La déconnexion masque les actions privées et supprime la photo', () => {
   const {root,get}=createDom();
   renderIdentityProfile(root,{session:googlePayload});

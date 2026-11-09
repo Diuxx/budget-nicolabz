@@ -23,6 +23,7 @@ Application de budget personnel en Eleventy, JavaScript et Web Awesome. Le fonct
 - Chaque mois possède ses revenus et dépenses indépendants, avec montant et date prévus, montant et date réels.
 - Les flèches parcourent le calendrier, y compris entre décembre et janvier. Consulter un mois absent ne crée aucune donnée.
 - Le bouton « Préparer ce mois » propose de reprendre les prévisions du mois précédent. Les liens de financement sont conservés, les dates sont adaptées au nouveau mois et les montants réels restent à renseigner. Un mois existant n'est jamais écrasé.
+- Dans « Budget du mois », « Reporter le budget sur le mois suivant » copie les prévisions et ouvre le mois suivant. Si ce mois existe déjà, son remplacement intégral (prévu et réel) demande une confirmation.
 - Les lignes sont rattachées à un compte. Une dépense peut être financée par un revenu ; un revenu peut provenir d'un autre revenu pour représenter un virement interne.
 - La page Budget permet de filtrer les dépenses par **compte** ou par **revenu financeur**, comme dans Todo. Les montants disponibles prévus et réels sont affichés pour chaque revenu.
 - Un récapitulatif annuel présente **prévu / réel** pour chaque type de revenu d’épargne. Il n’ajoute pas les dépenses d’épargne une seconde fois.

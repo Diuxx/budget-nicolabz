@@ -1,7 +1,8 @@
 import { confirmAction } from './alerts.js';
 import { marginThresholds } from '../core/margin-thresholds.js';
 import { exportExcel } from './excel-export.js';
-import { periodKey, shiftPeriod, createPeriod, deleteIncome, createBudgetDemo } from '../core/period-model.js';
+import { saveBudgetEntry } from '../core/budget-editing.js';
+import { periodKey, periodLabel, shiftPeriod, getPeriod, createPeriod, deleteIncome, createBudgetDemo } from '../core/period-model.js';
 import { exportData, exportOriginalBackup, exportImportTemplate, exportImportSchema } from '../core/storage.js';
 import { allowedViews } from './application-controller.js';
 
@@ -17,6 +18,13 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
     const key=target.dataset.id,p=period();
     if(action.startsWith('edit-income')&&action!=='edit-income-type'){entryForm('income',p?.incomes.find(item=>item.id===key));return;}
     if(action==='edit-expense'){entryForm('expense',p?.expenses.find(item=>item.id===key));return;}
+    if(action==='duplicate-income'||action==='duplicate-expense'){
+      const kind=action==='duplicate-income'?'income':'expense';
+      const entry=(kind==='income'?p?.incomes:p?.expenses)?.find(item=>item.id===key);
+      if(!entry)throw new Error('Cette ligne est introuvable.');
+      mutate(()=>saveBudgetEntry(p,kind,null,{...structuredClone(entry),realAmount:null,realDate:null}),'Ligne dupliquée. Le réel reste à renseigner.');
+      return;
+    }
     if(action==='record-income'||action==='record-expense'){
       const item=(action==='record-income'?p.incomes:p.expenses).find(item=>item.id===key);
       recordForm(action==='record-income'?'income':'expense',item);return;
@@ -31,6 +39,20 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       case 'create-period':{const copy=document.querySelector('#copyPrevious')?.checked??false;mutate(()=>createPeriod(model.data,model.selectedPeriod,copy),'Mois préparé. Les montants réels sont à renseigner.');break;}
       case 'delete-period':if(await confirmAction(`Supprimer les revenus et dépenses de ${monYear()} ?`))mutate(()=>{model.data.periods=model.data.periods.filter(item=>item.date!==model.selectedPeriod);},'Mois supprimé.');break;
       case 'add-income':entryForm('income');break;
+      case 'carry-budget':{
+        if(!p)break;
+        const nextDate=shiftPeriod(p.date,1);
+        const existing=getPeriod(model.data,nextDate);
+        const existingSnapshot=JSON.stringify(existing);
+        if(existing&&!await confirmAction(`Remplacer le budget de ${periodLabel(nextDate)} ? Ses prévisions et ses montants réels seront effacés.`))break;
+        mutate(()=>{
+          if(period()!==p||JSON.stringify(getPeriod(model.data,nextDate))!==existingSnapshot)throw new Error('Le budget a changé. Relancez le report.');
+          if(existing)model.data.periods=model.data.periods.filter(item=>item.date!==nextDate);
+          createPeriod(model.data,nextDate);
+        },`Prévisions reportées sur ${periodLabel(nextDate)}. Les montants réels restent à renseigner.`);
+        selectPeriod(nextDate);
+        break;
+      }
       case 'add-expense':entryForm('expense');break;
       case 'cancel-dialog':dialog.open=false;break;
       case 'copy-planned-real':copyPlannedReal();break;

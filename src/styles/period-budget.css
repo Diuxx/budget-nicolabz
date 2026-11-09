@@ -182,3 +182,4 @@ wa-option[aria-selected="true"] { background-color: var(--color-surface-muted); 
 .margin-settings p { color: var(--color-text-secondary); font-size: 12px; }
 .margin-settings label { display: inline-flex; flex-direction: column; gap: 8px; margin: 8px 24px 8px 0; font-size: 12px; }
 .margin-settings input { min-height: 42px; max-width: 180px; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text); }
+.budget-heading-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
