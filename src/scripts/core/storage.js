@@ -102,12 +102,12 @@ export function exportImportSchema(){downloadJSON(BUDGET_SCHEMA,'pecule-budget-v
 /** Efface les anciennes sauvegardes pour empêcher leur migration après une remise à zéro.
  * Ne jamais appeler localStorage.clear() : d'autres outils peuvent partager l'origine.
  */
-export function resetLocalData(storage=localStorage, empty=createEmptyBudget()) {
+export function resetLocalData(storage=localStorage, empty=createEmptyBudget(), preservedAnchorKey=null) {
   const clean=validateData(empty);
   const keys=[];
   for(let i=0;i<storage.length;i++){
     const key=storage.key(i);
-    if(key&&key!=='pecule:budget:v1'&&(key==='marge:budget:v4'||key.startsWith('marge:budget:')||key.startsWith('marge:backup:')||key.startsWith('marge:identity:anchor:v1:pecule:')||key.startsWith('marge:identity:anchor:v1:budget:')||key==='marge:selected-period'||key==='budget-personnel:v1'))keys.push(key);
+    if(key&&key!=='pecule:budget:v1'&&key!==preservedAnchorKey&&(key==='marge:budget:v4'||key.startsWith('marge:budget:')||key.startsWith('marge:backup:')||key.startsWith('marge:identity:anchor:v1:pecule:')||key.startsWith('marge:identity:anchor:v1:budget:')||key==='marge:selected-period'||key==='budget-personnel:v1'))keys.push(key);
   }
   // Écrire le budget vierge avant de supprimer les anciennes copies.
   storage.setItem('pecule:budget:v1',JSON.stringify(clean));

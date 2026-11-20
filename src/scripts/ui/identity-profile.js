@@ -26,7 +26,7 @@ function allowedPicture(url) {
  * Les attributs sont utilisés plutôt que les propriétés JS : si le Web Component
  * n'est pas encore défini au moment du retour OAuth, sa mise à niveau reste sûre.
  */
-export function renderIdentityProfile(root, { session, checking = false, error = null, locallyModified = false, syncing = false }) {
+export function renderIdentityProfile(root, { session, checking = false, error = null, locallyModified = false, syncing = false, driveReconnectRequired = false, syncFailed = false }) {
   const user = session.authenticated && session.user ? session.user : null;
   const authenticated = Boolean(user);
   const driveConnected = authenticated && session.driveConnected === true;
@@ -40,18 +40,24 @@ export function renderIdentityProfile(root, { session, checking = false, error =
     else avatar.removeAttribute('image');
   }
 
-  const state = syncing ? 'syncing' : checking && !authenticated ? 'loading' : error ? 'error' : authenticated ? 'connected' : 'local';
+  const state = syncing ? 'syncing' : checking && !authenticated ? 'loading' : error ? 'error'
+    : authenticated && (!driveConnected || syncFailed) ? 'attention' : authenticated ? 'connected' : 'local';
   const headline = state === 'syncing' ? 'Sauvegarde en cours…'
     : state === 'loading' ? 'Vérification…'
     : state === 'error' ? 'Service indisponible'
     : !authenticated ? 'Mode local'
-    : !driveConnected ? 'Google connecté'
+    : driveReconnectRequired ? 'Drive à réautoriser'
+    : !driveConnected ? 'Drive à autoriser'
+    : syncFailed ? 'Synchronisation à reprendre'
     : locallyModified ? 'À synchroniser' : 'Drive connecté';
   const indicator = root.querySelector('#saveIndicator');
   if (indicator) {
     indicator.dataset.state = state;
     indicator.title = state === 'syncing' ? headline
       : state === 'error' ? `Connexion au service impossible : ${error}`
+      : driveReconnectRequired ? 'Drive à réautoriser dans Paramètres · Sauvegarde locale active'
+      : authenticated && !driveConnected ? 'Drive à autoriser dans Paramètres · Sauvegarde locale active'
+      : syncFailed ? 'Synchronisation à reprendre dans Paramètres · Sauvegarde locale active'
       : driveConnected ? 'Google connecté · Drive autorisé · Sauvegarde locale active'
       : authenticated ? 'Compte Google connecté · Drive à autoriser · Sauvegarde locale active'
       : 'Budget enregistré localement dans ce navigateur';
@@ -59,17 +65,15 @@ export function renderIdentityProfile(root, { session, checking = false, error =
   setText(root, '#connection-status', headline);
   setText(root, '#profileName', user?.name || (checking ? 'Vérification de la session…' : error ? 'Service indisponible' : 'Non connecté'));
   setText(root, '#profileEmail', user?.email || (error ? error : 'Connexion via Nicolabz Identity'));
-  setText(root, '#profileDriveState', driveConnected ? (locallyModified ? 'Drive autorisé · modifications locales à envoyer' : 'Drive autorisé · synchronisation manuelle')
-    : authenticated ? 'Drive non autorisé' : 'Drive non connecté');
+  setText(root, '#profileDriveState', driveReconnectRequired ? 'Drive à réautoriser dans Paramètres'
+    : authenticated && !driveConnected ? 'Drive à autoriser dans Paramètres'
+    : syncFailed ? 'Synchronisation à reprendre dans Paramètres'
+    : driveConnected ? (locallyModified ? 'Drive autorisé · modifications locales à envoyer' : 'Drive autorisé · synchronisation automatique')
+    : 'Drive non connecté');
 
   showItem(root, '#profileLogin', !authenticated && !checking);
-  showItem(root, '#profileDriveConnect', authenticated && !driveConnected);
-  showItem(root, '#profileSync', authenticated);
   showItem(root, '#profileLogoutDivider', authenticated);
   showItem(root, '#profileLogout', authenticated);
-  showItem(root, '#profileRefresh', !checking);
-
-
 }
 
 /** Empêche qu'un résultat de session incomplet soit affiché comme une connexion valide. */

@@ -5,7 +5,8 @@ import { BUDGET_SCHEMA, validateAgainstBudgetSchema } from '../src/scripts/core/
 import { createEmptyBudget, createBudgetDemo } from '../src/scripts/core/period-model.js';
 import { validateData, normalizeImport, resetLocalData, readImport } from '../src/scripts/core/storage.js';
 import { resetBudget } from '../src/scripts/services/budget-reset.js';
-import { getIdentitySyncInfo } from '../src/scripts/services/identity-sync.js';
+import { getIdentitySyncInfo, synchronizeIdentity } from '../src/scripts/services/identity-sync.js';
+import { createDataTools } from '../src/scripts/ui/data-tools.js';
 
 function store(initial={}) {
   const values=new Map(Object.entries(initial));
@@ -85,6 +86,66 @@ test('Drive : reset versionné sans supprimer local si la sauvegarde échoue',as
   const api={appId:'pecule',readBudget:async()=>({version:3,data:demo()}),saveBudget:async()=>{const err=new Error('Conflit');err.code='SYNC_CONFLICT';throw err;}};
   await assert.rejects(resetBudget({storage:local,api,userId:7,resetDrive:true}),/Conflit/);
   assert.equal(local.getItem('pecule:budget:v1'),original);
+});
+
+test('Un reset local connecté conserve son ancre pour détecter les conflits Drive',async()=>{
+  const key='marge:identity:anchor:v1:pecule:7';
+  const anchor=JSON.stringify({version:3,digest:'abc'});
+  const local=store({'pecule:budget:v1':JSON.stringify(demo()),[key]:anchor,
+    'marge:identity:anchor:v1:pecule:8':'autre'});
+  await resetBudget({storage:local,api:{appId:'pecule'},userId:7});
+  assert.equal(local.getItem(key),anchor);
+  assert.equal(local.getItem('marge:identity:anchor:v1:pecule:8'),null);
+});
+
+test('Un reset local connecté synchronise le budget vide si Drive est inchangé',async()=>{
+  const data=demo(),local=store({'pecule:budget:v1':JSON.stringify(data)});
+  const remote={version:1,data:structuredClone(data)};
+  const api={appId:'pecule',readBudget:async()=>structuredClone(remote),saveBudget:async(version,incoming)=>{
+    assert.equal(version,remote.version);
+    remote.data=structuredClone(incoming);
+    return {version:++remote.version};
+  }};
+  await synchronizeIdentity({api,userId:7,storage:local,getData:()=>data,setData(){},choose:async()=>{throw new Error('Choix inattendu');}});
+  const result=await resetBudget({storage:local,api,userId:7});
+  const outcome=await synchronizeIdentity({api,userId:7,storage:local,getData:()=>result.data,setData(){},choose:async()=>{throw new Error('Choix inattendu');}});
+  assert.equal(outcome,'uploaded');
+  assert.deepEqual(remote.data,createEmptyBudget());
+});
+
+test('Un reset local demande confirmation si Drive a changé depuis la dernière synchronisation',async()=>{
+  const data=demo(),local=store({'pecule:budget:v1':JSON.stringify(data)});
+  const remote={version:1,data:structuredClone(data)};
+  const api={appId:'pecule',readBudget:async()=>structuredClone(remote),saveBudget:async()=>{throw new Error('Écriture inattendue');}};
+  await synchronizeIdentity({api,userId:7,storage:local,getData:()=>data,setData(){},choose:async()=>{throw new Error('Choix inattendu');}});
+  const result=await resetBudget({storage:local,api,userId:7});
+  remote.version++;remote.data.periods[0].minMargin=42;
+  let choice;
+  const outcome=await synchronizeIdentity({api,userId:7,storage:local,getData:()=>result.data,setData(){},choose:async request=>{choice=request;return 'cancel';}});
+  assert.equal(outcome,'cancel');
+  assert.equal(choice.type,'conflict');
+  assert.equal(remote.data.periods[0].minMargin,42);
+});
+
+test('Un reset local programme la synchronisation après la libération du verrou',async t=>{
+  const local=store({'pecule:budget:v1':JSON.stringify(demo())});
+  const previous=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
+  Object.defineProperty(globalThis,'localStorage',{value:local,configurable:true,writable:true});
+  t.after(()=>previous?Object.defineProperty(globalThis,'localStorage',previous):delete globalThis.localStorage);
+  const fields={
+    '#resetDriveChoice':{checked:false},
+    '#resetConfirmation':{value:'EFFACER'},
+    '#confirmFullReset':{disabled:false},
+  };
+  const connection={busy:false,locallyModified:false,sessionState:{authenticated:true,driveConnected:true,user:{id:7}}};
+  let scheduled=0;
+  const tools=createDataTools({
+    model:{},connection,identityApi:{appId:'pecule'},resetDialog:{querySelector:selector=>fields[selector]},
+    importInput:{},render(){},showToast(){},onDataChanged(){assert.equal(connection.busy,false);scheduled++;},
+  });
+  await tools.performFullReset();
+  assert.equal(scheduled,1);
+  assert.deepEqual(JSON.parse(local.getItem('pecule:budget:v1')),createEmptyBudget());
 });
 
 test('Drive : un reset confirmé écrase le JSON distant avec version CAS et réancre la synchro',async()=>{

@@ -13,7 +13,7 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
   const {projectForm,accountForm,referenceForm,deleteReference}=managementForms;
   const {copyPlannedReal}=formDialog;
   const {openResetDialog,performFullReset,importBudget}=dataTools;
-  const {refreshSession,driveAction,startLogin,startDriveConsent,logout,disconnectDrive}=identity;
+  const {driveAction,startLogin,startDriveConsent,logout,disconnectDrive}=identity;
   async function act(action,target){
     const key=target.dataset.id,p=period();
     if(action.startsWith('edit-income')&&action!=='edit-income-type'){entryForm('income',p?.incomes.find(item=>item.id===key));return;}
@@ -87,7 +87,6 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       case 'drive-pull':void driveAction('pull');break;
       case 'auth-login':startLogin();break;
       case 'auth-drive':startDriveConsent();break;
-      case 'auth-refresh':void refreshSession();break;
       case 'auth-logout':void logout();break;
       case 'auth-drive-disconnect':void disconnectDrive();break;
     }

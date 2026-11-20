@@ -82,6 +82,13 @@ test('Drive vide : création sur confirmation avec version 0',async()=>{
   assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userA'}).version,1);
 });
 
+test('Une écriture sans version confirmée ne crée pas de référence de synchronisation',async()=>{
+  const local=createDemoData(),storage=memoryStorage();
+  const api={appId:'pecule',readBudget:async()=>({version:0,data:null}),saveBudget:async()=>({version:0})};
+  await assert.rejects(synchronizeIdentity(params(api,storage,local,async()=> 'local')),/pas confirmé/);
+  assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userA'}),null);
+});
+
 test('Deux appareils : téléchargement seulement après consentement si pas de point de référence',async()=>{
   const local=createDemoData(),remoteData=createDemoData();
   remoteData.periods[0].minMargin=9999;
@@ -91,6 +98,27 @@ test('Deux appareils : téléchargement seulement après consentement si pas de 
   assert.equal(request.type,'conflict');
   assert.equal(outcome,'downloaded');
   assert.equal(local.periods[0].minMargin,9999);
+});
+
+test('Un navigateur sans budget local récupère automatiquement une sauvegarde Drive',async()=>{
+  const local=createDemoData(),remote=createDemoData(),storage=memoryStorage();
+  remote.periods[0].minMargin=42;
+  const options=params(fakeApi({version:2,data:remote}),storage,local,async()=>{throw new Error('Choix inattendu');});
+  const outcome=await synchronizeIdentity({...options,localDataMissing:true});
+  assert.equal(outcome,'downloaded');
+  assert.deepEqual(local,remote);
+  assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userA'}).version,2);
+});
+
+test('Un changement de session pendant la lecture ne remplace ni local ni Drive',async()=>{
+  const local=createDemoData(),original=structuredClone(local),storage=memoryStorage();
+  const remote=createDemoData();remote.periods[0].minMargin=42;
+  let written=false;
+  const options=params(fakeApi({version:2,data:remote},()=>{written=true;}),storage,local);
+  await assert.rejects(synchronizeIdentity({...options,localDataMissing:true,assertCurrent:()=>{throw new Error('Session changée');}}),/Session changée/);
+  assert.deepEqual(local,original);
+  assert.equal(written,false);
+  assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userA'}),null);
 });
 
 test('Refus de conflit : aucune donnée remplacée',async()=>{

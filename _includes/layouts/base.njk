@@ -47,8 +47,8 @@
   <wa-dialog id="resetDialog" label="Réinitialiser les données de Pécule" class="reset-dialog">
     <p>Cette opération supprime les budgets mensuels, comptes personnalisés, projets, archives et anciennes sauvegardes locales. Elle ne conserve que les <strong>types de revenus et catégories par défaut</strong>, avec un compte principal vierge.</p>
     <p><strong>Conseil :</strong> exportez votre budget avant de continuer. Cette suppression est irréversible sans sauvegarde.</p>
-    <wa-checkbox id="resetDriveChoice">Réinitialiser aussi ma sauvegarde Google Drive (si connecté)</wa-checkbox>
-    <p class="reset-hint">Par défaut, seul ce navigateur est réinitialisé. Sans cette option, les anciennes données peuvent être rechargées depuis Drive lors d''une synchronisation ultérieure.</p>
+    <wa-checkbox id="resetDriveChoice">Réinitialiser immédiatement ma sauvegarde Google Drive (si connecté)</wa-checkbox>
+    <p class="reset-hint">Sans cette option, le budget local vide sera synchronisé automatiquement si Drive est connecté. En cas de conflit, choisissez la version à conserver.</p>
     <wa-input id="resetConfirmation" size="s" label="Saisissez EFFACER pour confirmer" autocomplete="off" placeholder="EFFACER"></wa-input>
     <div class="reset-actions">
       <button class="button button-secondary button-compact" type="button" data-action="reset-cancel">Annuler</button>

@@ -87,7 +87,7 @@ wa-button.profile-trigger:focus-visible::part(base) { outline:2px solid var(--sa
 #saveIndicator[data-state="connected"] .save-dot { background: var(--sage); }
 #saveIndicator[data-state="loading"] { color: var(--muted); }
 #saveIndicator[data-state="loading"] .save-dot { background: #929c96; }
-#saveIndicator[data-state="error"] { color: #ffbfae; }
-#saveIndicator[data-state="error"] .save-dot { background: #d9957a; }
+#saveIndicator[data-state="error"], #saveIndicator[data-state="attention"] { color: #ffbfae; }
+#saveIndicator[data-state="error"] .save-dot, #saveIndicator[data-state="attention"] .save-dot { background: #d9957a; }
 #profileAvatar[image] { --size: 34px; }
 #profileButton:focus-visible #profileAvatar { outline: 2px solid var(--sage); outline-offset: 3px; border-radius: 50%; }

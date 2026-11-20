@@ -32,6 +32,7 @@ const views = {
 const controller = createApplicationController({model,connection,views,
   app:document.querySelector('#app'),toastElement:document.querySelector('#toast'),
   onRendered:()=>identity.updateDriveStatus(),
+  onDataChanged:()=>identity.scheduleAutomaticSync(),
 });
 const {render,showToast,mutate} = controller;
 const identity = createIdentityController({model,connection,identityApi,render,showToast,
@@ -40,7 +41,7 @@ const identity = createIdentityController({model,connection,identityApi,render,s
 const formDialog = createFormDialog({dialog,mutate,showToast});
 const budgetForms = createBudgetForms({model,presentation,dialog,openForm:formDialog.openForm});
 const managementForms = createManagementForms({model,dialog,openForm:formDialog.openForm,mutate});
-const dataTools = createDataTools({model,connection,identityApi,resetDialog,importInput,render,showToast});
+const dataTools = createDataTools({model,connection,identityApi,resetDialog,importInput,render,showToast,onDataChanged:()=>identity.scheduleAutomaticSync()});
 
 controller.initialize();
 identity.startSessionTracking();

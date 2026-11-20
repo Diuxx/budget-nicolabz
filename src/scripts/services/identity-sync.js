@@ -2,17 +2,23 @@ import { normalizeImport } from '../core/storage.js';
 import { digestData } from '../core/sync-plan.js';
 
 const ANCHOR_PREFIX = 'marge:identity:anchor:v1:';
-const storageKey = (appId, userId) => `${ANCHOR_PREFIX}${appId}:${userId}`;
+export const identityAnchorKey = (appId, userId) => `${ANCHOR_PREFIX}${appId}:${userId}`;
 
 function readAnchor(storage, appId, userId) {
-  try { return JSON.parse(storage.getItem(storageKey(appId, userId)) || 'null'); }
+  try { return JSON.parse(storage.getItem(identityAnchorKey(appId, userId)) || 'null'); }
   catch { return null; }
 }
 
 function writeAnchor(storage, appId, userId, version, digest) {
-  storage.setItem(storageKey(appId, userId), JSON.stringify({
+  storage.setItem(identityAnchorKey(appId, userId), JSON.stringify({
     version, digest, updatedAt: new Date().toISOString(),
   }));
+}
+
+function validateSavedVersion(saved, previousVersion) {
+  if (!Number.isSafeInteger(saved?.version) || saved.version <= previousVersion) {
+    throw new Error('Google Drive n’a pas confirmé la nouvelle version.');
+  }
 }
 
 export function getIdentitySyncInfo({ storage, appId, userId }) {
@@ -40,18 +46,22 @@ export function decideIdentitySync({ anchor, remoteVersion, localDigest, remoteD
  * Appelle la même API que les autres applications nicolabz (namespace « pecule »).
  * Les fichiers Drive restent gérés par nodjs-google-auth, pas par Pécule.
  */
-export async function synchronizeIdentity({ api, userId, getData, setData, choose, storage, mode = 'auto' }) {
+export async function synchronizeIdentity({ api, userId, getData, setData, choose, storage, mode = 'auto', localDataMissing = false, assertCurrent = () => {} }) {
   if (!userId) throw new Error('Une session Google valide est nécessaire.');
   const localData = normalizeImport(getData());
   const localDigest = await digestData(localData);
   const remote = await api.readBudget();
-  if (!Number.isInteger(remote.version) || remote.version < 0) throw new Error('Version Drive invalide.');
+  assertCurrent();
+  if (!Number.isSafeInteger(remote.version) || remote.version < 0) throw new Error('Version Drive invalide.');
 
   if (remote.data === null) {
     if (remote.version !== 0) throw new Error('Réponse Drive incohérente.');
     const choice = await choose({ type: 'empty', message: 'Aucune sauvegarde Pécule sur Google Drive. Envoyer les données de ce navigateur ?' });
     if (choice !== 'local') return 'cancel';
+    assertCurrent();
     const saved = await api.saveBudget(0, localData);
+    assertCurrent();
+    validateSavedVersion(saved, 0);
     writeAnchor(storage, api.appId, userId, saved.version, localDigest);
     return 'created';
   }
@@ -59,7 +69,9 @@ export async function synchronizeIdentity({ api, userId, getData, setData, choos
   const remoteData = normalizeImport(remote.data);
   const remoteDigest = await digestData(remoteData);
   const anchor = readAnchor(storage, api.appId, userId);
-  let decision = decideIdentitySync({ anchor, remoteVersion: remote.version, localDigest, remoteDigest, mode });
+  let decision = mode === 'auto' && localDataMissing && !anchor
+    ? 'remote'
+    : decideIdentitySync({ anchor, remoteVersion: remote.version, localDigest, remoteDigest, mode });
 
   if (decision === 'conflict') {
     const message = mode === 'pull'
@@ -70,6 +82,7 @@ export async function synchronizeIdentity({ api, userId, getData, setData, choos
     decision = await choose({ type: 'conflict', message });
   }
 
+  assertCurrent();
   if (decision === 'cancel') return 'cancel';
   if (decision === 'identical') {
     writeAnchor(storage, api.appId, userId, remote.version, remoteDigest);
@@ -78,11 +91,14 @@ export async function synchronizeIdentity({ api, userId, getData, setData, choos
   if (decision === 'remote') {
     // setData doit terminer la sauvegarde locale avant d'acter la synchronisation.
     await setData(remoteData);
+    assertCurrent();
     writeAnchor(storage, api.appId, userId, remote.version, remoteDigest);
     return 'downloaded';
   }
   if (decision === 'local') {
     const saved = await api.saveBudget(remote.version, localData);
+    assertCurrent();
+    validateSavedVersion(saved, remote.version);
     writeAnchor(storage, api.appId, userId, saved.version, localDigest);
     return 'uploaded';
   }

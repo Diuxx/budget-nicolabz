@@ -4,7 +4,7 @@ import { esc, btn } from './components.js';
 
 export const allowedViews=new Set(['dashboard','budget','analytics','transactions','projects','accounts','settings']);
 
-export function createApplicationController({model,connection,app,toastElement,views,onRendered}){
+export function createApplicationController({model,connection,app,toastElement,views,onRendered,onDataChanged=()=>{}}){
   let toastTimer;
   function showToast(message,isError=false){toastElement.textContent=message;toastElement.className=`visible ${isError?'error':''}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastElement.className='',5000);}
   function mutate(change,message='Enregistré localement · Drive à synchroniser'){
@@ -12,7 +12,7 @@ export function createApplicationController({model,connection,app,toastElement,v
     if(connection.busy)throw new Error('Attendez la fin de la synchronisation.');
     const previous=structuredClone(model.data);
     try{change();saveData(model.data);}catch(error){model.data=previous;throw error;}
-    connection.locallyModified=true;render();showToast(message);
+    connection.locallyModified=true;render();showToast(message);onDataChanged();
   }
   function setView(view){if(!allowedViews.has(view))return;model.currentView=view;location.hash=view;render();window.scrollTo({top:0,behavior:'smooth'});}
   function selectPeriod(key,view){

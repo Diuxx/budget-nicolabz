@@ -18,12 +18,12 @@ test('Pécule ne charge plus Google Identity Services ou les anciens modules Dri
   assert.match(app,/identityApi\.getSession/);
 });
 
-test('les actions de sauvegarde se trouvent uniquement dans le menu utilisateur du header',()=>{
+test('le menu utilisateur conserve les exports sans actions de synchronisation',()=>{
   const menuStart=header.indexOf('<wa-dropdown id="profileMenu"');
   assert.ok(menuStart>=0);
   assert.doesNotMatch(header.slice(0,menuStart),/data-action="(?:import|export|drive-sync)"|driveTopButton/);
   const menu=header.slice(menuStart);
   assert.match(menu,/<wa-dropdown-item id="profileImport" value="import">/);
   assert.match(menu,/<wa-dropdown-item id="profileExport" value="export">/);
-  assert.match(menu,/<wa-dropdown-item id="profileSync" value="drive-sync" hidden>/);
+  assert.doesNotMatch(menu,/value="(?:drive-sync|auth-drive|auth-refresh)"/);
 });

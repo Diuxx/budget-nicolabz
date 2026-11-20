@@ -51,11 +51,12 @@ The user menu also exports an Excel workbook with one sheet per year. It is
 for consultation, not a complete backup: Excel import is not implemented.
 
 **Réinitialiser toutes mes données** requires entering `EFFACER`. By default
-it resets only this browser and removes old local recovery copies to prevent
-automatic restoration. The optional Drive reset replaces the remote document
-with an empty budget using a version-checked write; a failed write or conflict
-leaves the local budget intact. It does not delete the Drive file or revoke
-Google access. Export a backup before resetting.
+it resets this browser and removes old local recovery copies. If Drive is
+connected, the empty budget is then synchronized automatically; a conflict
+requires choosing which version to keep. The optional immediate Drive reset
+replaces the remote document first using a version-checked write; a failed
+write or conflict leaves the local budget intact. Neither option deletes the
+Drive file or revokes Google access. Export a backup before resetting.
 
 ## Google sign-in and Drive
 
@@ -71,7 +72,7 @@ applications:
 
 ```dotenv
 PUBLIC_BASE_URL=http://localhost:3000
-CLIENT_APPS_JSON=[{"id":"pecule","origins":["http://localhost:8081"]}]
+CLIENT_APPS_JSON=[{"id":"pecule","origins":["http://localhost:8081"],"requiresDrive":true}]
 ```
 
 Configure Google OAuth callbacks on the Identity server's origin, and restart
@@ -79,12 +80,20 @@ the server after configuration changes. Use `localhost` consistently rather
 than mixing it with `127.0.0.1`. In production, use HTTPS and register the exact
 deployed Pécule origin.
 
-In the profile menu, choose **Connexion Google**, then **Autoriser Google
-Drive**, and finally **Synchroniser**. Drive consent is separate from login.
-The first upload requires confirmation. When local and remote budgets differ
-without a usable synchronization anchor, choose which version to keep; there
-is no automatic merge. A concurrent write can produce a conflict, requiring
-another synchronization. Signing out does not erase the local or Drive budget.
+With `requiresDrive` enabled for Pécule on the Identity server, Drive consent
+is requested during **Connexion Google**. Existing sessions without Drive can
+use **Autoriser Google Drive** in **Paramètres → Google Drive · synchronisation**.
+
+After connection, Pécule checks Drive automatically. A new browser downloads
+an existing budget; local changes are saved locally and synchronized to Drive.
+The first upload to an empty Drive requires confirmation. When local and remote
+budgets differ without a usable synchronization anchor, choose which version to
+keep; there is no automatic merge. A concurrent write can produce a conflict,
+requiring another synchronization. Network failures leave local data intact;
+retry with **Réessayer la synchronisation** in settings if necessary. If a
+synchronization attempt detects missing, expired, or denied Drive access,
+Pécule shows an alert and offers Drive authorization in the same section.
+Signing out does not erase either budget.
 
 `INVALID_RETURN_URL` and `ORIGIN_FORBIDDEN` generally indicate an unregistered
 or mismatched origin. For connection failures, check the Identity URL, server

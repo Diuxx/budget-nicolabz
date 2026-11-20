@@ -3,7 +3,7 @@ import { currentPeriodKey } from '../core/period-model.js';
 import { readImport, saveData } from '../core/storage.js';
 import { resetBudget } from '../services/budget-reset.js';
 
-export function createDataTools({model,connection,identityApi,resetDialog,importInput,render,showToast}){
+export function createDataTools({model,connection,identityApi,resetDialog,importInput,render,showToast,onDataChanged=()=>{}}){
   function openResetDialog() {
     if (connection.busy) throw new Error('Une opération Drive est déjà en cours.');
     const cloud = resetDialog.querySelector('#resetDriveChoice');
@@ -26,6 +26,7 @@ export function createDataTools({model,connection,identityApi,resetDialog,import
     }
     connection.busy=true;
     resetDialog.querySelector('#confirmFullReset').disabled=true;
+    let syncAfterReset=false;
     try {
       const result=await resetBudget({
         storage:localStorage,
@@ -37,25 +38,27 @@ export function createDataTools({model,connection,identityApi,resetDialog,import
       model.selectedPeriod=currentPeriodKey();
       model.fundingFilter='all';
       connection.locallyModified=!result.driveReset;
+      syncAfterReset=!result.driveReset;
       model.loadError=null;
       resetDialog.open=false;
       render();
       showToast(result.driveReset
         ? 'Toutes les données ont été réinitialisées dans Pécule et Google Drive.'
-        : 'Données locales réinitialisées. La sauvegarde Drive est inchangée.');
+        : 'Données locales réinitialisées. La synchronisation Drive sera tentée si le compte est connecté.');
     } catch(error) {
       if(error.code==='SYNC_CONFLICT')showToast('Conflit Drive : les données ont changé ailleurs. Aucune réinitialisation locale effectuée.',true);
       else showToast(`Réinitialisation impossible : ${error.message}`,true);
       resetDialog.querySelector('#confirmFullReset').disabled=false;
-    } finally { connection.busy=false; }
+    } finally { connection.busy=false; if(syncAfterReset)onDataChanged(); }
   }
 
   async function importBudget(){
       const file=importInput.files?.[0];if(!file)return;
       try{if(connection.busy)throw new Error('Attendez la fin de la synchronisation.');const incoming=await readImport(file);if(!await confirmAction(`Importer « ${file.name} » et remplacer le budget local ?`))return;
+        if(connection.busy)throw new Error('Attendez la fin de la synchronisation.');
         // Keep a recovery copy before a user-requested replacement.
         if(!model.loadError)localStorage.setItem('marge:backup:before-import:v4',JSON.stringify(model.data));
-        saveData(incoming);model.data=incoming;model.loadError=null;connection.locallyModified=true;render();showToast('Budget importé et validé selon le patron JSON Pécule v1.');
+        saveData(incoming);model.data=incoming;model.loadError=null;connection.locallyModified=true;render();showToast('Budget importé et validé selon le patron JSON Pécule v1.');onDataChanged();
       }catch(error){showToast(error.message,true);}finally{importInput.value='';}
   }
   return {openResetDialog,performFullReset,importBudget};

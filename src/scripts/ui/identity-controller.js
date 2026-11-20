@@ -7,27 +7,38 @@ export function createIdentityController({model,connection,identityApi,syncChoic
   let identityError=null;
   let identityChecking=true;
   let sessionRefreshPromise=null;
+  let driveReconnectUserId=null;
+  let tracking=false;
+  let syncScheduled=false;
+  let pendingSync=false;
+  let syncFailed=false;
+  let syncCancelled=false;
   function updateDriveStatus() {
     const {authenticated,driveConnected}=connection.sessionState;
+    const driveReconnectRequired=authenticated&&driveReconnectUserId===connection.sessionState.user?.id;
     document.querySelectorAll('.drive-panel details').forEach(details=>{details.hidden=!(authenticated&&driveConnected);});
     const visible={
       'auth-login':!authenticated,
-      'auth-drive':authenticated&&!driveConnected,
-      'drive-sync':authenticated&&driveConnected,
+      'auth-drive':authenticated,
+      'drive-sync':authenticated&&driveConnected&&(syncFailed||Boolean(identityError)),
       'drive-pull':authenticated&&driveConnected,
       'drive-push':authenticated&&driveConnected,
       'auth-logout':authenticated,
     };
     document.querySelectorAll('.drive-panel [data-action]').forEach(button=>{
       button.hidden=!visible[button.dataset.action];
-      button.disabled=identityChecking||Boolean(identityError)||connection.busy;
+      button.disabled=identityChecking||connection.busy||(Boolean(identityError)&&button.dataset.action!=='drive-sync');
+      if(button.dataset.action==='auth-drive')button.textContent=driveConnected||driveReconnectRequired?'Réautoriser Google Drive':'Autoriser Google Drive';
+      if(button.dataset.action==='drive-sync')button.textContent='Réessayer la synchronisation';
     });
     const indicator=document.querySelector('#driveStatus');
     if (indicator) {
-      indicator.classList.toggle('connected',connection.sessionState.driveConnected);
+      indicator.classList.toggle('connected',driveConnected&&!syncFailed&&!identityError);
       indicator.textContent=identityError ? `Service indisponible : ${identityError}`
         : !connection.sessionState.authenticated ? 'Compte Google non connecté'
+        : driveReconnectRequired ? 'Compte connecté · réautorisation Drive requise'
         : !connection.sessionState.driveConnected ? 'Compte connecté · autorisation Drive requise'
+        : syncFailed ? 'Synchronisation à reprendre dans les paramètres'
         : 'Google Drive connecté · prêt à synchroniser';
       const meta=document.querySelector('#driveMeta');
       const anchor=getIdentitySyncInfo({ storage:localStorage, appId:identityApi.appId, userId:connection.sessionState.user?.id });
@@ -45,6 +56,8 @@ export function createIdentityController({model,connection,identityApi,syncChoic
       error: identityError,
       locallyModified:connection.locallyModified,
       syncing:connection.busy,
+      driveReconnectRequired:connection.sessionState.authenticated&&driveReconnectUserId===connection.sessionState.user?.id,
+      syncFailed,
     });
   }
 
@@ -55,8 +68,18 @@ export function createIdentityController({model,connection,identityApi,syncChoic
     updateDriveStatus();
     sessionRefreshPromise=(async()=>{
       try {
-        connection.sessionState=parseIdentitySession(await identityApi.getSession());
+        const previous=connection.sessionState;
+        const session=parseIdentitySession(await identityApi.getSession());
+        if(session.authenticated&&previous.authenticated&&session.user.id===previous.user?.id&&previous.driveConnected&&!session.driveConnected) {
+          driveReconnectUserId=session.user.id;
+          showToast('Accès Drive perdu. Réautorisez Google Drive dans Paramètres.',true);
+        }
+        if(session.authenticated&&session.user.id===driveReconnectUserId)session.driveConnected=false;
+        else driveReconnectUserId=null;
+        connection.sessionState=session;
         identityError=null;
+        if(tracking&&session.authenticated&&session.driveConnected&&
+          (!previous.authenticated||!previous.driveConnected||previous.user?.id!==session.user.id||syncFailed&&!syncCancelled&&!connection.busy))scheduleAutomaticSync();
       } catch(error) {
         // Une indisponibilité de l’API ne prouve pas que Google a déconnecté l'utilisateur.
         identityError=error.message;
@@ -93,16 +116,21 @@ export function createIdentityController({model,connection,identityApi,syncChoic
     location.assign(identityApi.driveConsentUrl(returnUrl()));
   }
   async function logout() {
+    if(connection.busy) {showToast('Attendez la fin de la synchronisation.',true);return;}
     try {
       await identityApi.logout();
       connection.sessionState={authenticated:false,user:null,driveConnected:false};
+      driveReconnectUserId=null;
       identityError=null;
+      syncFailed=false;
+      syncCancelled=false;
       connection.locallyModified=false;
       updateDriveStatus();
       showToast('Compte déconnecté. Le budget local est conservé.');
     } catch(error) {showToast(`Déconnexion : ${error.message}`,true);}
   }
   async function disconnectDrive() {
+    if(connection.busy) {showToast('Attendez la fin de la synchronisation.',true);return;}
     if (!await confirmAction('Dissocier l’autorisation Drive ? Les fichiers Drive ne seront pas supprimés.')) return;
     try {
       await identityApi.disconnectDrive();
@@ -133,20 +161,64 @@ export function createIdentityController({model,connection,identityApi,syncChoic
       syncChoiceDialog.open=true;
     });
   }
-  async function driveAction(mode) {
+  function scheduleAutomaticSync() {
+    pendingSync=true;
+    if(syncScheduled||connection.busy)return;
+    syncScheduled=true;
+    setTimeout(()=>{
+      syncScheduled=false;
+      if(connection.busy)return;
+      if(!pendingSync)return;
+      pendingSync=false;
+      if(model.loadError||identityError||!connection.sessionState.authenticated||!connection.sessionState.driveConnected)return;
+      void driveAction('auto',true);
+    },0);
+  }
+  async function driveAction(mode,automatic=false) {
     if (connection.busy) return;
+    if (model.loadError) {if(!automatic)showToast('Importez une sauvegarde valide avant de synchroniser.',true);return;}
     if (!connection.sessionState.authenticated) {startLogin();return;}
     if (!connection.sessionState.driveConnected) {startDriveConsent();return;}
+    pendingSync=false;
+    syncFailed=false;
+    syncCancelled=false;
     connection.busy=true;
     updateDriveStatus();
+    const userId=connection.sessionState.user.id;
+    let expectedLocal;
+    let expectedModel;
+    const assertCurrent=()=>{
+      if(!connection.sessionState.authenticated||connection.sessionState.user?.id!==userId||!connection.sessionState.driveConnected||
+        localStorage.getItem('pecule:budget:v1')!==expectedLocal||JSON.stringify(model.data)!==expectedModel) {
+        throw new Error('La session ou le budget local a changé. Rechargez la page avant de synchroniser.');
+      }
+    };
     try {
+      expectedLocal=localStorage.getItem('pecule:budget:v1');
+      expectedModel=JSON.stringify(model.data);
+      const currentSession=parseIdentitySession(await identityApi.getSession());
+      if(currentSession.authenticated&&currentSession.user.id===userId&&!currentSession.driveConnected) {
+        connection.sessionState=currentSession;
+        throw Object.assign(new Error('Autorisation Google Drive indisponible.'),{code:'DRIVE_NOT_CONNECTED'});
+      }
+      if(!currentSession.authenticated||currentSession.user.id!==userId) {
+        connection.sessionState=currentSession;
+        throw new Error('La session Google a changé. Vérifiez le compte avant de synchroniser.');
+      }
+      identityError=null;
+      assertCurrent();
+      if(expectedLocal!==null&&JSON.stringify(JSON.parse(expectedLocal))!==expectedModel) {
+        throw new Error('Le budget a changé dans un autre onglet. Rechargez la page avant de synchroniser.');
+      }
       const result=await synchronizeIdentity({
         api:identityApi,
-        userId:connection.sessionState.user.id,
+        userId,
         mode,
         storage:localStorage,
         getData:()=>model.data,
-        setData:incoming=>{saveData(incoming);model.data=incoming;render();},
+        localDataMissing:expectedLocal===null,
+        assertCurrent,
+        setData:incoming=>{saveData(incoming);model.data=incoming;expectedLocal=localStorage.getItem('pecule:budget:v1');expectedModel=JSON.stringify(model.data);render();},
         choose:requestSyncChoice,
       });
       const messages={
@@ -156,25 +228,34 @@ export function createIdentityController({model,connection,identityApi,syncChoic
         identical:'Votre budget local et Drive sont identiques.',
         cancel:'Synchronisation annulée : aucune donnée remplacée.',
       };
-      if (result !== 'cancel') connection.locallyModified=false;
-      showToast(messages[result]||'Synchronisation terminée.');
+      connection.locallyModified=result==='cancel';
+      syncFailed=result==='cancel';
+      syncCancelled=result==='cancel';
+      if(!automatic||result!=='identical')showToast(messages[result]||'Synchronisation terminée.');
       updateDriveStatus();
     } catch(error) {
+      syncFailed=true;
+      connection.locallyModified=true;
       if(error.code==='SYNC_CONFLICT')showToast('Conflit : Drive a changé pendant l’enregistrement. Relancez la synchronisation pour choisir la version.',true);
-      else if(error.code==='DRIVE_RECONNECT_REQUIRED'||error.code==='DRIVE_NOT_CONNECTED') {
-        await refreshSession();
-        showToast('Drive doit être réautorisé depuis le menu du compte.',true);
+      else if(error.code==='DRIVE_RECONNECT_REQUIRED'||error.code==='DRIVE_NOT_CONNECTED'||error.code==='DRIVE_ACCESS_DENIED') {
+        if(connection.sessionState.user?.id===userId) {
+          driveReconnectUserId=userId;
+          connection.sessionState={...connection.sessionState,driveConnected:false};
+          await refreshSession();
+        }
+        showToast('Accès Drive refusé ou expiré. Réautorisez Google Drive dans Paramètres.',true);
       } else showToast(`Google Drive : ${error.message}`,true);
-    } finally {connection.busy=false;updateDriveStatus();}
+    } finally {connection.busy=false;updateDriveStatus();if(pendingSync)scheduleAutomaticSync();}
   }
 
 
 
   function startSessionTracking(){
+    tracking=true;
     const authResult=consumeAuthResult();void refreshSession().then(session=>{if(authResult==='connected'&&!session.authenticated&&!identityError)showToast('Connexion Google à vérifier.',true);});
     window.addEventListener('pageshow',event=>{if(event.persisted)void refreshSession();});window.addEventListener('focus',()=>{void refreshSession();});
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void refreshSession();});
     document.querySelector('#profileMenu')?.addEventListener('wa-show',()=>{void refreshSession();});
   }
-  return {updateDriveStatus,refreshSession,startLogin,startDriveConsent,logout,disconnectDrive,driveAction,startSessionTracking};
+  return {updateDriveStatus,refreshSession,startLogin,startDriveConsent,logout,disconnectDrive,driveAction,startSessionTracking,scheduleAutomaticSync};
 }
