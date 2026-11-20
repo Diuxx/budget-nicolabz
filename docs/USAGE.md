@@ -107,14 +107,14 @@ JSON backups and never commit financial data or credentials.
 
 ## Deployment
 
-`deploy.sh` installs dependencies, tests, builds, and publishes the static site
+`ops/deploy.sh` installs dependencies, tests, builds, and publishes the static site
 under `/var/www/pecule`. It requires npm, rsync, Nginx, and, for HTTPS setup,
 certbot with its Nginx plugin. Point DNS to the server and open ports 80 and 443.
 
 ```bash
-bash deploy.sh --domain=pecule.example.com --email=admin@example.com --ssl
-bash deploy.sh
-bash deploy.sh --release
+bash ops/deploy.sh --domain=pecule.example.com --email=admin@example.com --ssl
+bash ops/deploy.sh
+bash ops/deploy.sh --release
 ```
 
 The first command configures Nginx and requests a certificate. Without

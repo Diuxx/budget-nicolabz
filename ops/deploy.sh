@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage : bash deploy.sh [--release] [--nginx] [--ssl] [--domain=exemple.fr] [--email=moi@exemple.fr]
-#   bash deploy.sh --domain=pecule.nicolabz.dev --email=moi@exemple.fr --ssl
+# Usage : bash ops/deploy.sh [--release] [--nginx] [--ssl] [--domain=exemple.fr] [--email=moi@exemple.fr]
+#   bash ops/deploy.sh --domain=pecule.nicolabz.dev --email=moi@exemple.fr --ssl
 # (DOMAIN et CERTBOT_EMAIL en variables d'environnement fonctionnent aussi)
-PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_NAME="pecule"
 DOMAIN="${DOMAIN:-pecule.nicolabz.dev}"
 CERTBOT_EMAIL="${CERTBOT_EMAIL:-}"
@@ -24,7 +24,7 @@ for arg in "$@"; do
     --ssl) REQUEST_SSL=1; CONFIGURE_NGINX=1 ;;
     --domain=*) DOMAIN="${arg#--domain=}" ;;
     --email=*) CERTBOT_EMAIL="${arg#--email=}" ;;
-    *) echo "Option inconnue : $arg (usage : bash deploy.sh [--release] [--nginx] [--ssl] [--domain=exemple.fr] [--email=moi@exemple.fr])" >&2; exit 1 ;;
+    *) echo "Option inconnue : $arg (usage : bash ops/deploy.sh [--release] [--nginx] [--ssl] [--domain=exemple.fr] [--email=moi@exemple.fr])" >&2; exit 1 ;;
   esac
 done
 
@@ -145,9 +145,9 @@ fi
 
 echo "Version déployée : $RELEASE_DIR"
 
-# Premier déploiement : bash deploy.sh --domain=... --email=... --ssl
+# Premier déploiement : bash ops/deploy.sh --domain=... --email=... --ssl
 # (le DNS A de $DOMAIN doit déjà pointer vers le serveur, ports 80/443 ouverts)
-# Mises à jour suivantes : bash deploy.sh
+# Mises à jour suivantes : bash ops/deploy.sh
 # Vérifications :
 #   ls -l /var/www/pecule/
 #   curl -I https://$DOMAIN/

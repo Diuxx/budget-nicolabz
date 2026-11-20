@@ -64,6 +64,12 @@ Deliver the simplest correct, secure, and maintainable solution.
 
 Optimize for human understanding, not code brevity or sophistication.
 
+## Deployment
+
+- Keep deployment scripts in `ops/`.
+- Include a short deployment note in `README.md` and detailed, verified
+  deployment instructions in `docs/USAGE.md`.
+
 ## Documentation
 
 All project documentation MUST be written in **English**.

@@ -21,6 +21,11 @@ npm run dev
 
 Open [http://localhost:8081](http://localhost:8081).
 
+## Deployment
+
+The static site can be deployed with `ops/deploy.sh`. See the
+[deployment instructions](docs/USAGE.md#deployment) before running it.
+
 ## Documentation
 
 See the [usage guide](docs/USAGE.md) for setup, data management, and development.
