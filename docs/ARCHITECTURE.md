@@ -57,3 +57,34 @@ Application web **100 % statique** (Eleventy + JavaScript natif), sans backend p
 ## Changements d'architecture
 - Préserver les frontières entre `core`, `services` et `ui`.
 - Mettre à jour ce document quand la structure, le déploiement ou l'authentification changent.
+
+## Design system Nicolabz
+
+- Source de vérité : dépôt `nicolabz-design-system` (branche `develop`).
+- Les fichiers générés utilisés par Pécule sont copiés dans `src/nicolabz-design-system/` :
+  - `theme.js`
+  - `styles/theme.css`
+  - `styles/typography.css`
+  - `styles/components.css`
+- `eleventy.config.js` expose ce dossier tel quel dans `dist/nicolabz/` ; le layout principal charge :
+  - `<script src="./nicolabz/theme.js"></script>`
+  - `<link rel="stylesheet" href="./nicolabz/styles/theme.css">`
+  - `<link rel="stylesheet" href="./nicolabz/styles/typography.css">`
+  - `<link rel="stylesheet" href="./nicolabz/styles/components.css">`
+- Le thème est appliqué via `data-theme` sur `<html>` et l''API `window.nicolabzTheme` (stockage local + `prefers-color-scheme`).
+- Les couleurs et espacements utilisés dans `main.css`, `webawesome.css` et `compact.css` s''appuient sur les tokens `--color-*`, `--radius-*` et `--space-*` exposés par `theme.css`.
+
+### Mettre à jour le design system
+
+1. Mettre à jour le dépôt `nicolabz-design-system` (branche `develop`), puis exécuter :
+   - `npm install`
+   - `npm run build`
+   - `npm run check`
+   - `npm test`
+2. Copier les fichiers générés vers ce projet (exemple PowerShell, en adaptant le chemin) :
+   - `Copy-Item ..\nicolabz-theme-starter\src\theme.js src\nicolabz-design-system\theme.js -Force`
+   - `Copy-Item ..\nicolabz-theme-starter\src\styles\theme.css src\nicolabz-design-system\styles\theme.css -Force`
+   - `Copy-Item ..\nicolabz-theme-starter\src\styles\typography.css src\nicolabz-design-system\styles\typography.css -Force`
+   - `Copy-Item ..\nicolabz-theme-starter\src\styles\components.css src\nicolabz-design-system\styles\components.css -Force`
+3. Ne jamais modifier ces fichiers directement dans Pécule : toute évolution passe par les tokens (`tokens/palette.json`) et la génération dans le dépôt de design system.
+4. Vérifier `npm test` puis `npm run build` dans ce projet.

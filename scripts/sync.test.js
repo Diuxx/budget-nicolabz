@@ -119,7 +119,7 @@ test('Conservation du budget local : aucune opération API ne supprime localStor
   const storage=memoryStorage(),local=createDemoData();
   await synchronizeIdentity(params(fakeApi({version:0,data:null}),storage,local,async()=> 'cancel'));
   assert.equal(getIdentitySyncInfo({storage,appId:'pecule',userId:'userA'}),null);
-  assert.equal(local.version,4);
+  assert.equal(local.version,1);
 });
 
 

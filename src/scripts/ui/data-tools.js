@@ -1,3 +1,4 @@
+import { confirmAction } from './alerts.js';
 import { currentPeriodKey } from '../core/period-model.js';
 import { readImport, saveData } from '../core/storage.js';
 import { resetBudget } from '../services/budget-reset.js';
@@ -51,10 +52,10 @@ export function createDataTools({model,connection,identityApi,resetDialog,import
 
   async function importBudget(){
       const file=importInput.files?.[0];if(!file)return;
-      try{if(connection.busy)throw new Error('Attendez la fin de la synchronisation.');const incoming=await readImport(file);if(!confirm(`Importer « ${file.name} » et remplacer le budget local ?`))return;
+      try{if(connection.busy)throw new Error('Attendez la fin de la synchronisation.');const incoming=await readImport(file);if(!await confirmAction(`Importer « ${file.name} » et remplacer le budget local ?`))return;
         // Keep a recovery copy before a user-requested replacement.
         if(!model.loadError)localStorage.setItem('marge:backup:before-import:v4',JSON.stringify(model.data));
-        saveData(incoming);model.data=incoming;model.loadError=null;connection.locallyModified=true;render();showToast('Budget importé et validé selon le patron JSON v4.');
+        saveData(incoming);model.data=incoming;model.loadError=null;connection.locallyModified=true;render();showToast('Budget importé et validé selon le patron JSON Pécule v1.');
       }catch(error){showToast(error.message,true);}finally{importInput.value='';}
   }
   return {openResetDialog,performFullReset,importBudget};

@@ -1,5 +1,21 @@
 # Pécule v0.8.5 — Budget mensuel
 
+Le menu utilisateur propose **Exporter un fichier Excel** : un onglet
+`budget - aaaa` par année présente les postes enregistrés, leurs comptes,
+leurs sources de financement et les montants prévus/réels. Les mois absents
+et les montants réels non renseignés restent vides. Les virements internes
+sont visibles dans le détail mais exclus des revenus de synthèse.
+Le modèle vierge `src/assets/templates/pecule-budget-template.xlsx` fournit
+le style de l'en-tête ; les lignes et onglets sont générés depuis les données.
+ExcelJS 4.4.0 est servi localement et chargé uniquement au lancement de l'export.
+Le JSON reste la sauvegarde complète réimportable : l'Excel est un document
+de consultation, sans import Excel ni archives/projets détaillés.
+
+Le format courant des imports/exports est **Pécule v1**. Le schéma et le modèle
+JSON publics sont générés depuis une seule définition. Les anciennes sauvegardes
+sont converties à l'entrée ; voir [Format des données](docs/DATA_FORMAT.md).
+Les mentions v4 ci-dessous décrivent le format historique, désormais remplacé.
+
 Application de budget personnel en Eleventy, JavaScript et Web Awesome. Le fonctionnement reprend la partie Budget du projet `todo`, avec le thème sombre de Pécule.
 
 ## Fonctionnement
@@ -7,6 +23,7 @@ Application de budget personnel en Eleventy, JavaScript et Web Awesome. Le fonct
 - Chaque mois possède ses revenus et dépenses indépendants, avec montant et date prévus, montant et date réels.
 - Les flèches parcourent le calendrier, y compris entre décembre et janvier. Consulter un mois absent ne crée aucune donnée.
 - Le bouton « Préparer ce mois » propose de reprendre les prévisions du mois précédent. Les liens de financement sont conservés, les dates sont adaptées au nouveau mois et les montants réels restent à renseigner. Un mois existant n'est jamais écrasé.
+- Dans « Budget du mois », « Reporter le budget sur le mois suivant » copie les prévisions et ouvre le mois suivant. Si ce mois existe déjà, son remplacement intégral (prévu et réel) demande une confirmation.
 - Les lignes sont rattachées à un compte. Une dépense peut être financée par un revenu ; un revenu peut provenir d'un autre revenu pour représenter un virement interne.
 - La page Budget permet de filtrer les dépenses par **compte** ou par **revenu financeur**, comme dans Todo. Les montants disponibles prévus et réels sont affichés pour chaque revenu.
 - Un récapitulatif annuel présente **prévu / réel** pour chaque type de revenu d’épargne. Il n’ajoute pas les dépenses d’épargne une seconde fois.

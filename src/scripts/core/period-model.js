@@ -1,4 +1,5 @@
 import { id, round, MONTHS } from './model.js';
+import { BUDGET_SCHEMA } from './budget-schema.js';
 
 export const DEFAULT_CATEGORIES = [
   ['housing','Logement'],['utilities','Charges et abonnements'],['food','Alimentation'],
@@ -22,7 +23,7 @@ export const currentPeriodKey=()=>{const now=new Date();return periodKey(now.get
 export const periodLabel=key=>`${MONTHS[Number(key.slice(5))-1]} ${key.slice(0,4)}`;
 export const getPeriod=(data,key)=>data.periods.find(period=>period.date===key);
 export function createEmptyBudget() {
-  return {version:4,periods:[],accounts:[{id:'main',name:'Compte principal',type:'Compte courant'}],
+  return {version:BUDGET_SCHEMA.properties.version.const,periods:[],accounts:[{id:'main',name:'Compte principal',type:'Compte courant'}],
     expenseCategories:structuredClone(DEFAULT_CATEGORIES),incomeTypes:structuredClone(DEFAULT_INCOME_TYPES),projects:[],legacyTransactions:[]};
 }
 export function blankPeriod(date){return {date,incomes:[],expenses:[]};}

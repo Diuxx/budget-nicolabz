@@ -54,7 +54,7 @@ test('références, cycles, dates et montants invalides refusés',()=>{
 test('migration des anciennes prévisions sans invention de réel ni double comptage des transactions',()=>{
   const old=createDemoData();old.years['2026'].lines[0].amounts[0]=3500;
   const before=structuredClone(old),data=normalizeImport(old),p=getPeriod(data,'2026-01');
-  assert.equal(data.version,4);assert.deepEqual(old,before);
+  assert.equal(data.version,1);assert.deepEqual(old,before);
   assert.equal(periodTotals(data,p).planned.margin,monthlyBudget(old,'2026',0).cashflow);
   assert.ok([...p.incomes,...p.expenses].every(item=>item.realAmount===null));
   assert.deepEqual(data.legacyTransactions,old.transactions);assert.deepEqual(data.projects,old.projects);
@@ -64,9 +64,9 @@ test('migration des anciennes prévisions sans invention de réel ni double comp
 test('migration locale sauvegardée une seule fois, ancien contenu conservé',()=>{
   const old=createDemoData(),raw=JSON.stringify(old),values=new Map([['marge:budget:v2',raw]]);
   globalThis.localStorage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
-  const data=loadData();assert.equal(data.version,4);
+  const data=loadData();assert.equal(data.version,1);
   assert.equal(values.get('marge:backup:before-periods:v4'),raw);assert.equal(values.get('marge:budget:v2'),raw);
-  assert.equal(JSON.parse(values.get('marge:budget:v4')).version,4);
+  assert.equal(JSON.parse(values.get('pecule:budget:v1')).version,1);
   assert.deepEqual(loadData(),data);
 });
 test('mois vides ignorés pendant la migration, seuils et montants négatifs préservés',()=>{

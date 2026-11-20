@@ -73,6 +73,16 @@ wa-button.profile-trigger:focus-visible::part(base) { outline:2px solid var(--sa
 
 /* Rendre la session immédiatement visible, même avant le chargement de Web Awesome. */
 #saveIndicator { transition: color .15s ease; }
+#saveIndicator[data-state="syncing"] { display: flex; color: var(--color-accent); }
+#saveIndicator[data-state="syncing"] .save-dot {
+  width: 12px; height: 12px; flex: none; background: transparent; box-shadow: none;
+  border: 2px solid var(--color-border); border-top-color: currentColor;
+  animation: save-spin .8s linear infinite;
+}
+@keyframes save-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  #saveIndicator[data-state="syncing"] .save-dot { animation: none; }
+}
 #saveIndicator[data-state="connected"] { color: var(--accent); }
 #saveIndicator[data-state="connected"] .save-dot { background: var(--sage); }
 #saveIndicator[data-state="loading"] { color: var(--muted); }

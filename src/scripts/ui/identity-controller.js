@@ -1,3 +1,4 @@
+import { confirmAction } from './alerts.js';
 import { renderIdentityProfile, parseIdentitySession } from './identity-profile.js';
 import { synchronizeIdentity, getIdentitySyncInfo } from '../services/identity-sync.js';
 import { saveData } from '../core/storage.js';
@@ -7,6 +8,20 @@ export function createIdentityController({model,connection,identityApi,syncChoic
   let identityChecking=true;
   let sessionRefreshPromise=null;
   function updateDriveStatus() {
+    const {authenticated,driveConnected}=connection.sessionState;
+    document.querySelectorAll('.drive-panel details').forEach(details=>{details.hidden=!(authenticated&&driveConnected);});
+    const visible={
+      'auth-login':!authenticated,
+      'auth-drive':authenticated&&!driveConnected,
+      'drive-sync':authenticated&&driveConnected,
+      'drive-pull':authenticated&&driveConnected,
+      'drive-push':authenticated&&driveConnected,
+      'auth-logout':authenticated,
+    };
+    document.querySelectorAll('.drive-panel [data-action]').forEach(button=>{
+      button.hidden=!visible[button.dataset.action];
+      button.disabled=identityChecking||Boolean(identityError)||connection.busy;
+    });
     const indicator=document.querySelector('#driveStatus');
     if (indicator) {
       indicator.classList.toggle('connected',connection.sessionState.driveConnected);
@@ -29,6 +44,7 @@ export function createIdentityController({model,connection,identityApi,syncChoic
       checking: identityChecking,
       error: identityError,
       locallyModified:connection.locallyModified,
+      syncing:connection.busy,
     });
   }
 
@@ -87,7 +103,7 @@ export function createIdentityController({model,connection,identityApi,syncChoic
     } catch(error) {showToast(`Déconnexion : ${error.message}`,true);}
   }
   async function disconnectDrive() {
-    if (!confirm('Dissocier l’autorisation Drive ? Les fichiers Drive ne seront pas supprimés.')) return;
+    if (!await confirmAction('Dissocier l’autorisation Drive ? Les fichiers Drive ne seront pas supprimés.')) return;
     try {
       await identityApi.disconnectDrive();
       await refreshSession();
@@ -122,6 +138,7 @@ export function createIdentityController({model,connection,identityApi,syncChoic
     if (!connection.sessionState.authenticated) {startLogin();return;}
     if (!connection.sessionState.driveConnected) {startDriveConsent();return;}
     connection.busy=true;
+    updateDriveStatus();
     try {
       const result=await synchronizeIdentity({
         api:identityApi,
@@ -148,7 +165,7 @@ export function createIdentityController({model,connection,identityApi,syncChoic
         await refreshSession();
         showToast('Drive doit être réautorisé depuis le menu du compte.',true);
       } else showToast(`Google Drive : ${error.message}`,true);
-    } finally {connection.busy=false;}
+    } finally {connection.busy=false;updateDriveStatus();}
   }
 
 

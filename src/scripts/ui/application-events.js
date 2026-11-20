@@ -1,4 +1,8 @@
-import { periodKey, shiftPeriod, createPeriod, deleteIncome, createBudgetDemo } from '../core/period-model.js';
+import { confirmAction } from './alerts.js';
+import { marginThresholds } from '../core/margin-thresholds.js';
+import { exportExcel } from './excel-export.js';
+import { saveBudgetEntry } from '../core/budget-editing.js';
+import { periodKey, periodLabel, shiftPeriod, getPeriod, createPeriod, deleteIncome, createBudgetDemo } from '../core/period-model.js';
 import { exportData, exportOriginalBackup, exportImportTemplate, exportImportSchema } from '../core/storage.js';
 import { allowedViews } from './application-controller.js';
 
@@ -10,24 +14,45 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
   const {copyPlannedReal}=formDialog;
   const {openResetDialog,performFullReset,importBudget}=dataTools;
   const {refreshSession,driveAction,startLogin,startDriveConsent,logout,disconnectDrive}=identity;
-  function act(action,target){
+  async function act(action,target){
     const key=target.dataset.id,p=period();
     if(action.startsWith('edit-income')&&action!=='edit-income-type'){entryForm('income',p?.incomes.find(item=>item.id===key));return;}
     if(action==='edit-expense'){entryForm('expense',p?.expenses.find(item=>item.id===key));return;}
+    if(action==='duplicate-income'||action==='duplicate-expense'){
+      const kind=action==='duplicate-income'?'income':'expense';
+      const entry=(kind==='income'?p?.incomes:p?.expenses)?.find(item=>item.id===key);
+      if(!entry)throw new Error('Cette ligne est introuvable.');
+      mutate(()=>saveBudgetEntry(p,kind,null,{...structuredClone(entry),realAmount:null,realDate:null}),'Ligne dupliquée. Le réel reste à renseigner.');
+      return;
+    }
     if(action==='record-income'||action==='record-expense'){
       const item=(action==='record-income'?p.incomes:p.expenses).find(item=>item.id===key);
       recordForm(action==='record-income'?'income':'expense',item);return;
     }
     if(action==='delete-income'||action==='delete-expense'){
-      if(confirm('Supprimer cette ligne du mois ?'))mutate(()=>{if(action==='delete-income')deleteIncome(p,key);else p.expenses=p.expenses.filter(item=>item.id!==key);});return;
+      if(await confirmAction('Supprimer cette ligne du mois ?'))mutate(()=>{if(action==='delete-income')deleteIncome(p,key);else p.expenses=p.expenses.filter(item=>item.id!==key);});return;
     }
     switch(action){
       case 'prev-month':selectPeriod(shiftPeriod(model.selectedPeriod,-1));break;
       case 'next-month':selectPeriod(shiftPeriod(model.selectedPeriod,1));break;
       case 'open-period':selectPeriod(target.dataset.period,'budget');break;
       case 'create-period':{const copy=document.querySelector('#copyPrevious')?.checked??false;mutate(()=>createPeriod(model.data,model.selectedPeriod,copy),'Mois préparé. Les montants réels sont à renseigner.');break;}
-      case 'delete-period':if(confirm(`Supprimer les revenus et dépenses de ${monYear()} ?`))mutate(()=>{model.data.periods=model.data.periods.filter(item=>item.date!==model.selectedPeriod);},'Mois supprimé.');break;
+      case 'delete-period':if(await confirmAction(`Supprimer les revenus et dépenses de ${monYear()} ?`))mutate(()=>{model.data.periods=model.data.periods.filter(item=>item.date!==model.selectedPeriod);},'Mois supprimé.');break;
       case 'add-income':entryForm('income');break;
+      case 'carry-budget':{
+        if(!p)break;
+        const nextDate=shiftPeriod(p.date,1);
+        const existing=getPeriod(model.data,nextDate);
+        const existingSnapshot=JSON.stringify(existing);
+        if(existing&&!await confirmAction(`Remplacer le budget de ${periodLabel(nextDate)} ? Ses prévisions et ses montants réels seront effacés.`))break;
+        mutate(()=>{
+          if(period()!==p||JSON.stringify(getPeriod(model.data,nextDate))!==existingSnapshot)throw new Error('Le budget a changé. Relancez le report.');
+          if(existing)model.data.periods=model.data.periods.filter(item=>item.date!==nextDate);
+          createPeriod(model.data,nextDate);
+        },`Prévisions reportées sur ${periodLabel(nextDate)}. Les montants réels restent à renseigner.`);
+        selectPeriod(nextDate);
+        break;
+      }
       case 'add-expense':entryForm('expense');break;
       case 'cancel-dialog':dialog.open=false;break;
       case 'copy-planned-real':copyPlannedReal();break;
@@ -37,17 +62,18 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       case 'view-accounts':setView('accounts');break;
       case 'add-account':accountForm();break;
       case 'edit-account':accountForm(model.data.accounts.find(item=>item.id===key));break;
-      case 'delete-account':deleteReference('account',key);break;
+      case 'delete-account':await deleteReference('account',key);break;
       case 'add-income-type':referenceForm('income-type');break;
       case 'edit-income-type':referenceForm('income-type',model.data.incomeTypes.find(item=>item.id===key));break;
-      case 'delete-income-type':deleteReference('income-type',key);break;
+      case 'delete-income-type':await deleteReference('income-type',key);break;
       case 'add-category':referenceForm('category');break;
       case 'edit-category':referenceForm('category',model.data.expenseCategories.find(item=>item.id===key));break;
-      case 'delete-category':deleteReference('category',key);break;
+      case 'delete-category':await deleteReference('category',key);break;
       case 'add-project':projectForm(null);break;
       case 'edit-project':projectForm(model.data.projects.find(item=>item.id===key));break;
-      case 'delete-project':if(confirm('Supprimer ce projet ?'))mutate(()=>{model.data.projects=model.data.projects.filter(item=>item.id!==key);});break;
+      case 'delete-project':if(await confirmAction('Supprimer ce projet ?'))mutate(()=>{model.data.projects=model.data.projects.filter(item=>item.id!==key);});break;
       case 'export':exportData(model.data);break;
+      case 'export-excel':await exportExcel(model.data);showToast('Fichier Excel exporté.');break;
       case 'import-template':exportImportTemplate();break;
       case 'import-schema':exportImportSchema();break;
       case 'reset-open':openResetDialog();break;
@@ -55,7 +81,7 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       case 'reset-confirm':void performFullReset();break;
       case 'export-original':exportOriginalBackup();break;
       case 'import':importInput.click();break;
-      case 'demo':if(confirm('Remplacer le budget local par un exemple ? Exportez votre budget auparavant.'))mutate(()=>{model.data=createBudgetDemo();model.selectedPeriod=model.data.periods[0].date;});break;
+      case 'demo':if(await confirmAction('Remplacer le budget local par un exemple ? Exportez votre budget auparavant.'))mutate(()=>{model.data=createBudgetDemo();model.selectedPeriod=model.data.periods[0].date;});break;
       case 'drive-sync':void driveAction('auto');break;
       case 'drive-push':void driveAction('push');break;
       case 'drive-pull':void driveAction('pull');break;
@@ -66,11 +92,18 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       case 'auth-drive-disconnect':void disconnectDrive();break;
     }
   }
-    document.querySelector('#profileMenu')?.addEventListener('wa-select',event=>{try{if(event.detail?.item?.value)act(event.detail.item.value,event.detail.item);}catch(error){showToast(error.message,true);}});
-    document.addEventListener('click',event=>{try{const viewButton=event.target.closest('[data-view]');if(viewButton){setView(viewButton.dataset.view);return;}const button=event.target.closest('[data-action]');if(button)act(button.dataset.action,button);}catch(error){showToast(error.message,true);}});
+    document.querySelector('#profileMenu')?.addEventListener('wa-select',event=>{try{if(event.detail?.item?.value)void act(event.detail.item.value,event.detail.item).catch(error=>showToast(error.message,true));}catch(error){showToast(error.message,true);}});
+    document.addEventListener('click',event=>{try{const viewButton=event.target.closest('[data-view]');if(viewButton){setView(viewButton.dataset.view);return;}const button=event.target.closest('[data-action]');if(button)void act(button.dataset.action,button).catch(error=>showToast(error.message,true));}catch(error){showToast(error.message,true);}});
     document.addEventListener('change',event=>{
       const el=event.target;
       try{
+        if(el.dataset?.marginThreshold){
+          const field=el.dataset.marginThreshold;
+          if(!['warning','positive'].includes(field))return;
+          const value=Number(el.value);
+          if(el.value.trim()===''||!Number.isFinite(value)||value<0)throw new Error('Saisissez un seuil positif ou nul.');
+          mutate(()=>{model.data.marginThresholds={...marginThresholds(model.data),[field]:value};});return;
+        }
         if(el.id==='monthSelect'){selectPeriod(periodKey(model.selectedPeriod.slice(0,4),Number(el.value)));return;}
         if(el.id==='yearSelect'){selectPeriod(periodKey(el.value,Number(model.selectedPeriod.slice(5))-1));return;}
         if(el.id==='fundingFilter'){model.fundingFilter=el.value;render();return;}

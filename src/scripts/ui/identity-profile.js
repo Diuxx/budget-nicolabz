@@ -26,7 +26,7 @@ function allowedPicture(url) {
  * Les attributs sont utilisés plutôt que les propriétés JS : si le Web Component
  * n'est pas encore défini au moment du retour OAuth, sa mise à niveau reste sûre.
  */
-export function renderIdentityProfile(root, { session, checking = false, error = null, locallyModified = false }) {
+export function renderIdentityProfile(root, { session, checking = false, error = null, locallyModified = false, syncing = false }) {
   const user = session.authenticated && session.user ? session.user : null;
   const authenticated = Boolean(user);
   const driveConnected = authenticated && session.driveConnected === true;
@@ -40,8 +40,9 @@ export function renderIdentityProfile(root, { session, checking = false, error =
     else avatar.removeAttribute('image');
   }
 
-  const state = checking && !authenticated ? 'loading' : error ? 'error' : authenticated ? 'connected' : 'local';
-  const headline = state === 'loading' ? 'Vérification…'
+  const state = syncing ? 'syncing' : checking && !authenticated ? 'loading' : error ? 'error' : authenticated ? 'connected' : 'local';
+  const headline = state === 'syncing' ? 'Sauvegarde en cours…'
+    : state === 'loading' ? 'Vérification…'
     : state === 'error' ? 'Service indisponible'
     : !authenticated ? 'Mode local'
     : !driveConnected ? 'Google connecté'
@@ -49,7 +50,8 @@ export function renderIdentityProfile(root, { session, checking = false, error =
   const indicator = root.querySelector('#saveIndicator');
   if (indicator) {
     indicator.dataset.state = state;
-    indicator.title = state === 'error' ? `Connexion au service impossible : ${error}`
+    indicator.title = state === 'syncing' ? headline
+      : state === 'error' ? `Connexion au service impossible : ${error}`
       : driveConnected ? 'Google connecté · Drive autorisé · Sauvegarde locale active'
       : authenticated ? 'Compte Google connecté · Drive à autoriser · Sauvegarde locale active'
       : 'Budget enregistré localement dans ce navigateur';

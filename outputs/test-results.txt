@@ -1,0 +1,109 @@
+✔ les dépenses et épargnes pointées suivent les non pointées sans modifier les données (169.0303ms)
+✔ parcours mensuel : copie, saisie prévu/réel, financement et sauvegarde (634.0562ms)
+[Pécule] Échec de vérification de session Nicolabz Identity : IdentityApiError: API d’authentification inaccessible. Vérifie son adresse, HTTPS et CORS.
+    at IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:47:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+  code: 'NETWORK_ERROR',
+  status: 0,
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:15363:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:40:18)
+      at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+    [cause]: AggregateError [ECONNREFUSED]: 
+        at internalConnectMultiple (node:net:1139:18)
+        at afterConnectMultiple (node:net:1714:7) {
+      code: 'ECONNREFUSED',
+      [errors]: [Array]
+    }
+  }
+}
+✔ un revenu transféré conserve ses liens et refuse les cycles (100.7732ms)
+[Pécule] Échec de vérification de session Nicolabz Identity : IdentityApiError: API d’authentification inaccessible. Vérifie son adresse, HTTPS et CORS.
+    at IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:47:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+  code: 'NETWORK_ERROR',
+  status: 0,
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:15363:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:40:18)
+      at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+    [cause]: AggregateError [ECONNREFUSED]: 
+        at internalConnectMultiple (node:net:1139:18)
+        at afterConnectMultiple (node:net:1714:7) {
+      code: 'ECONNREFUSED',
+      [errors]: [Array]
+    }
+  }
+}
+✔ filtre Todo par origine de financement et présente les cumuls annuels sans changer les données (77.2916ms)
+[Pécule] Échec de vérification de session Nicolabz Identity : IdentityApiError: API d’authentification inaccessible. Vérifie son adresse, HTTPS et CORS.
+    at IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:47:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+  code: 'NETWORK_ERROR',
+  status: 0,
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:15363:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:40:18)
+      at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+    [cause]: AggregateError [ECONNREFUSED]: 
+        at internalConnectMultiple (node:net:1139:18)
+        at afterConnectMultiple (node:net:1714:7) {
+      code: 'ECONNREFUSED',
+      [errors]: [Array]
+    }
+  }
+}
+✔ pointage limité aux montants et note, sans modification des autres informations (103.686ms)
+[Pécule] Échec de vérification de session Nicolabz Identity : IdentityApiError: API d’authentification inaccessible. Vérifie son adresse, HTTPS et CORS.
+    at IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:47:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+  code: 'NETWORK_ERROR',
+  status: 0,
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:15363:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:40:18)
+      at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+    [cause]: AggregateError [ECONNREFUSED]: 
+        at internalConnectMultiple (node:net:1139:18)
+        at afterConnectMultiple (node:net:1714:7) {
+      code: 'ECONNREFUSED',
+      [errors]: [Array]
+    }
+  }
+}
+✔ ouvrir un mois depuis les analyses mémorise la période et réinitialise le filtre (87.9659ms)
+[Pécule] Échec de vérification de session Nicolabz Identity : IdentityApiError: API d’authentification inaccessible. Vérifie son adresse, HTTPS et CORS.
+    at IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:47:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+  code: 'NETWORK_ERROR',
+  status: 0,
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:15363:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async IdentityApi.request (file:///C:/Users/nicol/budget-nicolabz/src/scripts/services/identity-api.js:40:18)
+      at async file:///C:/Users/nicol/budget-nicolabz/src/scripts/ui/identity-controller.js:57:54 {
+    [cause]: AggregateError [ECONNREFUSED]: 
+        at internalConnectMultiple (node:net:1139:18)
+        at afterConnectMultiple (node:net:1714:7) {
+      code: 'ECONNREFUSED',
+      [errors]: [Array]
+    }
+  }
+}
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6484.5165
