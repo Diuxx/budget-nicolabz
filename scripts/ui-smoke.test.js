@@ -2,10 +2,15 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {environment} from './ui-test-env.js';
 import {createEmptyBudget} from '../src/scripts/core/period-model.js';
 
-test('budget : prévu et réel, comptes, sans objectif minimal',async()=>{
+test('budget : tableaux réunis sans cartes de synthèse',async()=>{
   const env=environment();await import('../src/scripts/ui/app.js?budget-refactor');
-  assert.ok(env.main.innerHTML.includes('Entrées d’argent'));assert.ok(env.main.innerHTML.includes('Dépenses et épargne'));
-  assert.ok(env.main.innerHTML.includes('Réel saisi'));assert.ok(env.main.innerHTML.includes('À renseigner'));
+  assert.match(env.main.innerHTML,/<div class="budget-ledgers">[\s\S]*Entrées d’argent[\s\S]*Dépenses et épargne/);
+  assert.match(env.main.innerHTML,/aria-label="Liste des revenus" tabindex="0"/);
+  assert.match(env.main.innerHTML,/aria-label="Liste des dépenses" tabindex="0"/);
+  assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Entrées d’argent"/);
+  assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Dépenses et épargne"/);
+  assert.doesNotMatch(env.main.innerHTML,/class="period-metrics"|class="recording-note"/);
+  assert.ok(env.main.innerHTML.includes('À renseigner'));
   assert.doesNotMatch(env.main.innerHTML,/Marge minimale souhaitée|data-field="min-margin"/);
 });
 test('navigation sur un mois absent : aucun budget créé sans action',async()=>{
@@ -30,7 +35,7 @@ test('la vue annuelle retire la colonne Objectif minimal tout en affichant les m
 test('l’ancien seuil conservé dans une sauvegarde v4 ne s’affiche plus et ne change pas la marge',async()=>{
   const demo=(await import('../src/scripts/core/period-model.js')).createBudgetDemo();
   demo.periods[0].minMargin=10000;
-  const env=environment('budget',demo);
+  const env=environment('dashboard',demo);
   await import('../src/scripts/ui/app.js?legacy-without-target');
   assert.doesNotMatch(env.main.innerHTML,/Marge minimale|Objectif minimal|data-field="min-margin"/);
   assert.match(env.main.innerHTML,/Marge disponible/);

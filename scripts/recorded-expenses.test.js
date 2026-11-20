@@ -27,8 +27,8 @@ test('les sous-totaux suivent les groupes visibles et distinguent un réel absen
   period.expenses[0].realAmount=0;
   const model={data,selectedPeriod:period.date,fundingFilter:'account:main'};
   const views=createBudgetViews({model,presentation:createBudgetPresentation(model)});
-  const subtotals=[...views.renderBudget().matchAll(/<tr class="ledger-account">(.*?)<\/tr>/g)]
-    .map(([,row])=>[...row.matchAll(/<td class="align-right">(.*?)<\/td>/g)].map(([,value])=>value));
+  const subtotals=[...views.renderBudget().matchAll(/<tr class="ledger-account nz-table-group">(.*?)<\/tr>/g)]
+    .map(([,row])=>[...row.matchAll(/<td class="nz-table-align-end">(.*?)<\/td>/g)].map(([,value])=>value));
   assert.equal(subtotals.length,3);
   assert.deepEqual(subtotals[0].slice(0,2),[euro(3200),euro(3200)]);
   assert.deepEqual(subtotals[1],[euro(480),'—','—']);

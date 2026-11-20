@@ -32,6 +32,14 @@ transfers are excluded from external income totals. Annual savings by income
 type do not count savings expenses a second time. Actual balances are estimates
 from recorded entries, not bank balances.
 
+The budget tables use a local copy of the Nicolabz Design System table styles.
+To update that copy from the adjacent design-system checkout, run in PowerShell
+from the Pécule project root:
+
+```powershell
+Copy-Item ..\nicolabz-design-system\src\styles\tables.css src\nicolabz-design-system\styles\tables.css
+```
+
 ## Backups, import, and reset
 
 Use **Paramètres → Données et sauvegardes** to export or import a JSON budget

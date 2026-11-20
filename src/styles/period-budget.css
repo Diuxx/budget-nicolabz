@@ -42,12 +42,33 @@
 .ledger-panel { margin-bottom: 16px; overflow: hidden; }
 .ledger-panel > .panel-title { padding: 13px 16px; margin: 0; border-bottom: 1px solid var(--line); }
 .ledger-empty { padding: 22px 16px; color: var(--muted); font-size: 12px; }
-.period-table { min-width: 760px; }
-.data-table small { display: block; color: var(--muted); font-size: 10px; margin-top: 5px; max-width: 260px; white-space: normal; }
+.period-table { min-width: 760px; font-size: 12px; }
+.data-table small, .period-table small { display: block; color: var(--muted); font-size: 10px; margin-top: 5px; max-width: 260px; white-space: normal; }
+.period-table th, .period-table td { white-space: nowrap; }
+.period-table thead th { color: var(--muted); font-size: 11px; font-weight: 650; }
 .period-table td { vertical-align: middle; padding-block: 12px; }
 .period-table td:first-child strong { font-size: 12px; }
-.period-table td.align-right { font-variant-numeric: tabular-nums; }
-.ledger-account > * { background: var(--surface-soft); font-weight: 700; }
+@media (min-width: 1100px) {
+  .budget-ledgers {
+    width: calc(100vw - 2 * clamp(12px, 1.8vw, 22px));
+    margin-inline-start: calc((100% - 100vw) / 2 + clamp(12px, 1.8vw, 22px));
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--card-gap);
+    align-items: start;
+  }
+  .budget-ledgers .ledger-panel { min-width: 0; }
+  .budget-ledgers .panel-title { flex-wrap: wrap; }
+  .budget-ledgers .table-scroll { max-height: max(180px, calc(100vh - 370px)); }
+  .budget-ledgers .period-table { min-width: 0; table-layout: fixed; }
+  .budget-ledgers .period-table th, .budget-ledgers .period-table td { padding: 6px 5px; white-space: normal; overflow-wrap: anywhere; }
+  .budget-ledgers .period-table th:nth-child(1) { width: 20%; }
+  .budget-ledgers .period-table th:nth-child(2) { width: 21%; }
+  .budget-ledgers .period-table th:nth-child(3), .budget-ledgers .period-table th:nth-child(4) { width: 12%; }
+  .budget-ledgers .period-table th:nth-child(5) { width: 17%; }
+  .budget-ledgers .period-table th:nth-child(6) { width: 18%; }
+  .budget-ledgers .entry-actions { flex-wrap: wrap; gap: 3px; }
+}
 .ledger-account th { color: var(--sage); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
 .entry-tag { font-size: 10px; color: var(--sage); }
 .entry-actions { display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
