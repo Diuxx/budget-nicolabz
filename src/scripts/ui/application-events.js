@@ -1,12 +1,12 @@
 import { confirmAction } from './alerts.js';
 import { marginThresholds } from '../core/margin-thresholds.js';
 import { exportExcel } from './excel-export.js';
-import { saveBudgetEntry } from '../core/budget-editing.js';
+import { saveBudgetEntry, assertCreditSelectable, creditIsUsed } from '../core/budget-editing.js';
 import { periodKey, periodLabel, shiftPeriod, getPeriod, createPeriod, deleteIncome, createBudgetDemo } from '../core/period-model.js';
 import { exportData, exportOriginalBackup, exportImportTemplate, exportImportSchema } from '../core/storage.js';
 import { allowedViews } from './application-controller.js';
 
-export function bindApplicationEvents({model,presentation,controller,budgetForms,managementForms,formDialog,dataTools,identity,dialog,resetDialog,importInput}){
+export function bindApplicationEvents({model,presentation,controller,budgetForms,managementForms,formDialog,dataTools,identity,dialog,resetDialog,importInput,toggleEntryGroup}){
   const {period,monYear}=presentation;
   const {mutate,setView,selectPeriod,render,showToast}=controller;
   const {entryForm,recordForm}=budgetForms;
@@ -22,6 +22,7 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       const kind=action==='duplicate-income'?'income':'expense';
       const entry=(kind==='income'?p?.incomes:p?.expenses)?.find(item=>item.id===key);
       if(!entry)throw new Error('Cette ligne est introuvable.');
+      if(kind==='expense'&&entry.type==='credit')assertCreditSelectable(model.data,entry.projectId);
       mutate(()=>saveBudgetEntry(p,kind,null,{...structuredClone(entry),realAmount:null,realDate:null}),'Ligne dupliquée. Le réel reste à renseigner.');
       return;
     }
@@ -33,10 +34,11 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       if(await confirmAction('Supprimer cette ligne du mois ?'))mutate(()=>{if(action==='delete-income')deleteIncome(p,key);else p.expenses=p.expenses.filter(item=>item.id!==key);});return;
     }
     switch(action){
+      case 'toggle-entry-group':toggleEntryGroup(target);break;
       case 'prev-month':selectPeriod(shiftPeriod(model.selectedPeriod,-1));break;
       case 'next-month':selectPeriod(shiftPeriod(model.selectedPeriod,1));break;
       case 'open-period':selectPeriod(target.dataset.period,'budget');break;
-      case 'create-period':{const copy=document.querySelector('#copyPrevious')?.checked??false;mutate(()=>createPeriod(model.data,model.selectedPeriod,copy),'Mois préparé. Les montants réels sont à renseigner.');break;}
+      case 'create-period':{const copy=document.querySelector('#copyPrevious')?.checked??false;const previous=getPeriod(model.data,shiftPeriod(model.selectedPeriod,-1));const note=copy&&previous?.expenses.some(item=>item.type==='credit')?' Les crédits soldés ne sont pas reportés.':'';mutate(()=>createPeriod(model.data,model.selectedPeriod,copy),`Mois préparé. Les montants réels sont à renseigner.${note}`);break;}
       case 'delete-period':if(await confirmAction(`Supprimer les revenus et dépenses de ${monYear()} ?`))mutate(()=>{model.data.periods=model.data.periods.filter(item=>item.date!==model.selectedPeriod);},'Mois supprimé.');break;
       case 'add-income':entryForm('income');break;
       case 'carry-budget':{
@@ -49,7 +51,7 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
           if(period()!==p||JSON.stringify(getPeriod(model.data,nextDate))!==existingSnapshot)throw new Error('Le budget a changé. Relancez le report.');
           if(existing)model.data.periods=model.data.periods.filter(item=>item.date!==nextDate);
           createPeriod(model.data,nextDate);
-        },`Prévisions reportées sur ${periodLabel(nextDate)}. Les montants réels restent à renseigner.`);
+        },`Prévisions reportées sur ${periodLabel(nextDate)}. Les montants réels restent à renseigner.${p.expenses.some(item=>item.type==='credit')?' Les crédits soldés ne sont pas reportés.':''}`);
         selectPeriod(nextDate);
         break;
       }
@@ -71,7 +73,7 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       case 'delete-category':await deleteReference('category',key);break;
       case 'add-project':projectForm(null);break;
       case 'edit-project':projectForm(model.data.projects.find(item=>item.id===key));break;
-      case 'delete-project':if(await confirmAction('Supprimer ce projet ?'))mutate(()=>{model.data.projects=model.data.projects.filter(item=>item.id!==key);});break;
+      case 'delete-project':if(creditIsUsed(model.data,key))throw new Error('Ce crédit est utilisé dans le budget. Modifiez les dépenses associées avant de le supprimer.');if(await confirmAction('Supprimer ce projet ?'))mutate(()=>{model.data.projects=model.data.projects.filter(item=>item.id!==key);});break;
       case 'export':exportData(model.data);break;
       case 'export-excel':await exportExcel(model.data);showToast('Fichier Excel exporté.');break;
       case 'import-template':exportImportTemplate();break;

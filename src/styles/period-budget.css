@@ -70,8 +70,30 @@
   .budget-ledgers .entry-actions { flex-wrap: wrap; gap: 3px; }
 }
 .ledger-account th { color: var(--sage); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.period-table tbody[hidden] { display: none; }
+.ledger-toggle { display: grid; place-items: center; width: 27px; height: 27px; padding: 0; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--sage); cursor: pointer; }
+.ledger-toggle:hover { background: var(--color-surface-muted); }
+.ledger-toggle:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; }
+.ledger-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
 .entry-tag { font-size: 10px; color: var(--sage); }
 .entry-actions { display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
+@media (max-width: 1099px) {
+  .budget-ledgers .period-table { min-width: 0; table-layout: fixed; }
+  .budget-ledgers .period-table th, .budget-ledgers .period-table td { padding: 6px 2px; white-space: normal; overflow-wrap: anywhere; }
+  .budget-ledgers .period-table thead th:nth-child(1) { width: 18%; }
+  .budget-ledgers .period-table thead th:nth-child(2) { width: 17%; }
+  .budget-ledgers .period-table thead th:nth-child(3),
+  .budget-ledgers .period-table thead th:nth-child(4),
+  .budget-ledgers .period-table thead th:nth-child(5) { width: 15%; }
+  .budget-ledgers .period-table thead th:nth-child(6) { width: 20%; }
+  .budget-ledgers .entry-actions { flex-wrap: wrap; gap: 2px; }
+}
+@media (max-width: 590px) {
+  .budget-ledgers .period-table, .budget-ledgers .period-table td:first-child strong { font-size: 10px; }
+  .budget-ledgers .period-table thead th, .budget-ledgers .period-table small { font-size: 9px; }
+  .budget-ledgers .entry-actions .button[data-action^="record-"] { width: 27px; min-height: 27px; padding: 0; justify-content: center; }
+  .budget-ledgers .entry-actions .button[data-action^="record-"] span { display: none; }
+}
 .unrecorded { color: #b42318; font-size: 11px; font-weight: 700; }
 :root[data-theme="dark"] .unrecorded { color: var(--danger); }
 .warning { color: var(--warning); }

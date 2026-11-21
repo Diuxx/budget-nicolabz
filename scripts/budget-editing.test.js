@@ -28,6 +28,24 @@ test('projets : création, financement, puis retour à un objectif d’épargne'
   assert.doesNotThrow(()=>validateData(data));
 });
 
+test('un crédit conserve le montant à rembourser sans modifier le budget', () => {
+  const data=createBudgetDemo(),periods=structuredClone(data.periods);
+  const values={name:'Crédit auto',description:'',type:'credit',target:12000,saved:null};
+  saveProject(data,null,{...values});
+  const project=data.projects[0];
+  assert.equal(project.saved,0);
+  assert.equal(project.target,12000);
+  assert.doesNotThrow(()=>validateData(data));
+  assert.throws(()=>saveProject(data,project,{...values,target:-1}),/montants valides/);
+  assert.throws(()=>saveProject(data,project,{...values,target:null}),/montants valides/);
+  saveProject(data,project,{...values,type:'savings',saved:500});
+  saveProject(data,project,{...values,target:9000});
+  assert.equal(project.saved,500);
+  assert.equal(project.target,9000);
+  assert.deepEqual(data.periods,periods);
+  assert.doesNotThrow(()=>validateData(data));
+});
+
 test('comptes et références : édition et protection des références utilisées', () => {
   const data=createBudgetDemo();
   saveAccount(data,null,{name:'Compte secondaire',type:'Compte courant'});

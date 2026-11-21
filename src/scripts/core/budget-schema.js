@@ -45,8 +45,9 @@ export const BUDGET_SCHEMA = {
     } },
     expense: { ...line, required: [...line.required, 'type', 'categoryId', 'incomeId', 'note'], properties: {
       ...line.properties,
-      type: { enum: ['fixed', 'variable', 'savings'] },
+      type: { enum: ['fixed', 'variable', 'savings', 'credit'] },
       categoryId: { type: 'string', minLength: 1, maxLength: 120 },
+      projectId: { type: 'string', minLength: 1, maxLength: 120, description: 'Obligatoire pour une dépense de type credit ; doit identifier un projet de type credit.' },
       incomeId: nullableId,
       note: { type: 'string', maxLength: 1000 },
     } },
@@ -62,7 +63,7 @@ export const BUDGET_SCHEMA = {
     project: { ...named, required: ['id','name','description','type','target','saved'], properties: {
       ...named.properties,
       description: { type: 'string', maxLength: 500 },
-      type: { enum: ['savings', 'financing'] },
+      type: { enum: ['savings', 'financing', 'credit'] },
       target: nonNegative, saved: nonNegative,
       loanAmount: nonNegative, loanPayment: nonNegative,
       loanMonths: { type: 'integer', minimum: 1 },

@@ -32,6 +32,21 @@ transfers are excluded from external income totals. Annual savings by income
 type do not count savings expenses a second time. Actual balances are estimates
 from recorded entries, not bank balances.
 
+Use the arrow on a subtotal row to collapse or expand its entries. Income,
+recorded expenses, and unrecorded expenses are controlled independently.
+The selection remains in effect while using the app, but resets on reload.
+On small screens, the checkmark action records an entry's actual amount.
+
+In **Projets**, a credit project stores the amount to repay separately from
+savings and financing objectives. In Budget, select **Crédit - [name]** as an
+expense type to link a repayment. Only actual amounts entered across all months
+count toward repayment; planned amounts do not. Existing entries remain editable
+after a credit is paid, but paid credits cannot be selected for new entries and
+are not carried forward when preparing a month. Linked expenses must be
+reassigned before deleting a credit or changing its type. Older app versions
+may not recognize credit projects or their linked expenses in a backup or
+synchronized budget.
+
 The budget tables use a local copy of the Nicolabz Design System table styles.
 To update that copy from the adjacent design-system checkout, run in PowerShell
 from the Pécule project root:

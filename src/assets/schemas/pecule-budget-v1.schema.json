@@ -274,13 +274,20 @@
           "enum": [
             "fixed",
             "variable",
-            "savings"
+            "savings",
+            "credit"
           ]
         },
         "categoryId": {
           "type": "string",
           "minLength": 1,
           "maxLength": 120
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Obligatoire pour une dépense de type credit ; doit identifier un projet de type credit."
         },
         "incomeId": {
           "type": [
@@ -356,7 +363,8 @@
         "type": {
           "enum": [
             "savings",
-            "financing"
+            "financing",
+            "credit"
           ]
         },
         "target": {

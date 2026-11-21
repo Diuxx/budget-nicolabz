@@ -36,9 +36,10 @@ export async function createExcelBudget(data,ExcelJS,template){
       for(const [kind,entries] of [['Revenu',period.incomes],['Dépense',period.expenses]])for(const entry of entries){
         const sourceId=kind==='Revenu'?entry.deductedFromIncomeId:entry.incomeId;
         const source=period.incomes.find(income=>income.id===sourceId)?.name||'';
-        const label=kind==='Revenu'&&sourceId?'Virement interne':kind;
+        const credit=kind==='Dépense'&&entry.type==='credit'?data.projects.find(project=>project.id===entry.projectId):null;
+        const label=kind==='Revenu'&&sourceId?'Virement interne':credit?`Crédit · ${credit.name}`:kind;
         const type=kind==='Revenu'?data.incomeTypes.find(type=>type.id===entry.typeId)?.name:entry.type;
-        const identity=JSON.stringify([label,entry.name,entry.accountId,source,type]);
+        const identity=JSON.stringify([label,entry.name,entry.accountId,source,type,credit?.id]);
         const ordinal=seen.get(identity)||0;seen.set(identity,ordinal+1);
         const key=identity+ordinal;
         if(!lines.has(key))lines.set(key,{label,name:entry.name,account:accountName(entry.accountId),source,planned:Array(12).fill(null),real:Array(12).fill(null)});

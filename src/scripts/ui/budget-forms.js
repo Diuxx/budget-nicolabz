@@ -1,5 +1,5 @@
-import { EXPENSE_TYPES } from '../core/period-model.js';
-import { saveBudgetEntry, recordBudgetEntry } from '../core/budget-editing.js';
+import { EXPENSE_TYPES, creditRepayments, creditProgress } from '../core/period-model.js';
+import { saveBudgetEntry, recordBudgetEntry, assertCreditSelectable } from '../core/budget-editing.js';
 import { btn } from './components.js';
 
 export function createBudgetForms({model,presentation,dialog,openForm}){
@@ -9,11 +9,13 @@ export function createBudgetForms({model,presentation,dialog,openForm}){
     if(!model.data.accounts.length)throw new Error('Ajoutez d’abord un compte.');
     const income=kind==='income';
     const options=items=>items.map(item=>({value:item.id,label:item.name}));
+    const repayments=income?null:creditRepayments(model.data);
+    const credits=income?[]:model.data.projects.filter(project=>project.type==='credit'&&((entry?.type==='credit'&&project.id===entry.projectId)||creditProgress(project,repayments).remaining>0));
     const fields=[{name:'name',label:'Libellé',type:'text',value:entry?.name||''},
       {name:'accountId',label:'Compte',type:'select',value:entry?.accountId||model.data.accounts[0].id,options:options(model.data.accounts)},
       ...(income?[{name:'typeId',label:'Type de revenu',type:'select',value:entry?.typeId||model.data.incomeTypes[0]?.id,options:options(model.data.incomeTypes)},
         {name:'deductedFromIncomeId',label:'Origine de l’argent',type:'select',value:entry?.deductedFromIncomeId||'',required:false,options:[{value:'',label:'Entrée externe (salaire, prime…)'} ,...p.incomes.filter(item=>item.id!==entry?.id).map(item=>({value:item.id,label:`Prélevé sur ${item.name} · ${accountName(item.accountId)}`}))]}]:[
-        {name:'type',label:'Type de dépense',type:'select',value:entry?.type||'variable',options:EXPENSE_TYPES},
+        {name:'type',label:'Type de dépense',type:'select',value:entry?.type==='credit'?`credit:${entry.projectId}`:entry?.type||'variable',options:[...EXPENSE_TYPES,...credits.map(project=>({value:`credit:${project.id}`,label:`Crédit - ${project.name}`}))]},
         {name:'categoryId',label:'Catégorie',type:'select',value:entry?.categoryId||model.data.expenseCategories[0]?.id,options:options(model.data.expenseCategories)},
         {name:'incomeId',label:'Financée par',type:'select',value:entry?.incomeId||'',required:false,options:[{value:'',label:'Le compte directement'},...p.incomes.map(item=>({value:item.id,label:`${item.name} · ${accountName(item.accountId)}`}))]}]),
       {name:'plannedAmount',label:'Montant prévu (€)',type:'number',value:entry?.plannedAmount??0},
@@ -22,6 +24,11 @@ export function createBudgetForms({model,presentation,dialog,openForm}){
       {name:'realDate',label:'Date réelle',type:'date',additional:true,value:entry?.realDate||'',required:false},
       {name:'note',label:'Note',type:'textarea',value:entry?.note||'',required:false}];
     openForm(`${entry?'Modifier':'Ajouter'} ${income?'un revenu':'une dépense'}`,fields,values=>{
+      if(!income&&values.type.startsWith('credit:')){
+        const projectId=values.type.slice('credit:'.length);
+        assertCreditSelectable(model.data,projectId,entry?.type==='credit'?entry.projectId:undefined);
+        values.type='credit';values.projectId=projectId;
+      }
       saveBudgetEntry(period(),kind,entry,values,p);
     },`Pour ${monYear()}. Les prévisions et le réel sont enregistrés séparément.`, `<div class="modal-copy">${btn('copy-planned-real','Reprendre le prévu dans le réel','secondary small')}</div>`);
     if(!income){

@@ -18,14 +18,19 @@ export function createManagementForms({model,dialog,openForm,mutate}){
       saveProject(model.data,project,value);
     },'Les montants du projet ne modifient pas le budget. Saisissez les versements ou mensualités prévus dans Budget.');
     const typeControl=dialog.querySelector('[name="type"]');
-    const updateLoanFields=()=>{
+    const updateProjectFields=()=>{
+      const credit=typeControl.value==='credit';
+      dialog.querySelector('[name="target"]').label=credit?'Montant à rembourser (€)':'Montant cible du projet (€)';
+      const savedControl=dialog.querySelector('[name="saved"]');
+      savedControl.style.display=credit?'none':'';
+      savedControl.disabled=credit;
       for(const name of ['loanAmount','loanMonths','loanPayment']){
         const control=dialog.querySelector('[name="'+name+'"]');
         const visible=typeControl.value==='financing';
         control.style.display=visible?'':'none';control.disabled=!visible;
       }
     };
-    typeControl.addEventListener('change',updateLoanFields);updateLoanFields();
+    typeControl.addEventListener('change',updateProjectFields);updateProjectFields();
   }
 
   function accountForm(account){openForm(account?'Modifier le compte':'Ajouter un compte',[

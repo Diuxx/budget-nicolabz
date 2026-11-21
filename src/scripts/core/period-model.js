@@ -22,6 +22,18 @@ export function shiftPeriod(key, offset) {
 export const currentPeriodKey=()=>{const now=new Date();return periodKey(now.getFullYear(),now.getMonth());};
 export const periodLabel=key=>`${MONTHS[Number(key.slice(5))-1]} ${key.slice(0,4)}`;
 export const getPeriod=(data,key)=>data.periods.find(period=>period.date===key);
+export function creditRepayments(data) {
+  const totals=new Map();
+  for(const period of data.periods)for(const expense of period.expenses){
+    if(expense.type==='credit'&&expense.realAmount!==null)totals.set(expense.projectId,(totals.get(expense.projectId)||0)+expense.realAmount);
+  }
+  for(const [id,total] of totals)totals.set(id,round(total));
+  return totals;
+}
+export function creditProgress(project,repayments) {
+  const paid=repayments.get(project.id)||0;
+  return {paid,remaining:Math.max(0,round(project.target-paid)),progress:project.target>0?Math.min(1,paid/project.target):1};
+}
 export function createEmptyBudget() {
   return {version:BUDGET_SCHEMA.properties.version.const,periods:[],accounts:[{id:'main',name:'Compte principal',type:'Compte courant'}],
     expenseCategories:structuredClone(DEFAULT_CATEGORIES),incomeTypes:structuredClone(DEFAULT_INCOME_TYPES),projects:[],legacyTransactions:[]};
@@ -36,7 +48,9 @@ export function createPeriod(data,date,copyPrevious=true) {
     const incomeIds=new Map(previous.incomes.map(income=>[income.id,id()]));
     const copy=item=>({...structuredClone(item),id:id(),realAmount:null,realDate:null,plannedDate:shiftEntryDate(item.plannedDate,date)});
     period.incomes=previous.incomes.map(income=>({...copy(income),id:incomeIds.get(income.id),deductedFromIncomeId:incomeIds.get(income.deductedFromIncomeId)??null}));
-    period.expenses=previous.expenses.map(expense=>({...copy(expense),incomeId:incomeIds.get(expense.incomeId)??null}));
+    const repayments=creditRepayments(data);
+    const activeCredits=new Set(data.projects.filter(project=>project.type==='credit'&&creditProgress(project,repayments).remaining>0).map(project=>project.id));
+    period.expenses=previous.expenses.filter(expense=>expense.type!=='credit'||activeCredits.has(expense.projectId)).map(expense=>({...copy(expense),incomeId:incomeIds.get(expense.incomeId)??null}));
   }
   data.periods.push(period);data.periods.sort((a,b)=>a.date.localeCompare(b.date));return period;
 }

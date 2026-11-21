@@ -1,4 +1,14 @@
 import { id, PROJECT_TYPES } from './model.js';
+import { creditProgress, creditRepayments } from './period-model.js';
+
+export function creditIsUsed(data,projectId){
+    return data.periods.some(period=>period.expenses.some(expense=>expense.type==='credit'&&expense.projectId===projectId));
+}
+export function assertCreditSelectable(data,projectId,currentProjectId){
+    const project=data.projects.find(item=>item.id===projectId&&item.type==='credit');
+    if(!project)throw new Error('Ce crédit est introuvable.');
+    if(projectId!==currentProjectId&&creditProgress(project,creditRepayments(data)).remaining<=0)throw new Error('Ce crédit est déjà remboursé.');
+}
 
 // Mutations en mémoire ; la validation et la sauvegarde restent gérées par l'appelant.
 export function saveBudgetEntry(current,kind,entry,values,p=current){
@@ -7,6 +17,7 @@ export function saveBudgetEntry(current,kind,entry,values,p=current){
     else {values.incomeId||=null;if(values.incomeId)values.accountId=p.incomes.find(item=>item.id===values.incomeId)?.accountId;}
     const collection=kind==='income'?current.incomes:current.expenses;
     const next={...entry,...values,id:entry?.id||id()};
+    if(kind==='expense'&&next.type!=='credit')delete next.projectId;
     const index=collection.findIndex(item=>item.id===next.id);if(index<0)collection.push(next);else collection[index]=next;
     if(kind==='income')for(const expense of current.expenses)if(expense.incomeId===next.id)expense.accountId=next.accountId;
 }
@@ -19,7 +30,9 @@ export function recordBudgetEntry(currentPeriod,kind,entryId,values){
 }
 
 export function saveProject(data,project,value){
-    if(!PROJECT_TYPES.some(type=>type.value===value.type)||value.target<0||value.saved<0)throw new Error('Renseignez un type et des montants valides.');
+    if(project?.type==='credit'&&value.type!=='credit'&&creditIsUsed(data,project.id))throw new Error('Ce crédit est utilisé dans le budget. Modifiez les dépenses associées avant de changer son type.');
+    if(value.type==='credit')value.saved=project?.saved??0;
+    if(!PROJECT_TYPES.some(type=>type.value===value.type)||typeof value.target!=='number'||!Number.isFinite(value.target)||value.target<0||typeof value.saved!=='number'||!Number.isFinite(value.saved)||value.saved<0)throw new Error('Renseignez un type et des montants valides.');
     if(value.type==='financing'){
       if(value.loanAmount===null||value.loanAmount<0||!Number.isInteger(value.loanMonths)||value.loanMonths<=0||value.loanPayment===null||value.loanPayment<0)throw new Error('Renseignez le prêt, sa durée en mois entiers et sa mensualité.');
     }else{delete value.loanAmount;delete value.loanMonths;delete value.loanPayment;}

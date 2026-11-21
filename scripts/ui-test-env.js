@@ -24,5 +24,6 @@ export function environment(view='budget',input=createBudgetDemo(),confirmationC
   return {main,toast,controls,dialog,resetDialog,resetControls,form,values,
     saved:()=>JSON.parse(values.get('pecule:budget:v1')),
     action(name,id,extra={}){const target={dataset:{action:name,id,...extra},closest:selector=>selector==='[data-action]'?target:null};listeners.click({target});},
+    click(target){listeners.click({target});},
     change(target){listeners.change({target});},submit(){form.submit({preventDefault(){},currentTarget:form});}};
 }

@@ -23,3 +23,20 @@ test('export Excel : lignes dynamiques, réel nul, année et financement conserv
   assert.deepEqual(data,original);
   await assert.rejects(createExcelBudget({...data,periods:[]},ExcelJS,template),/Aucun mois/);
 });
+
+test('export Excel : distingue les mensualités de crédits différents',async()=>{
+  const data=createBudgetDemo(),period=data.periods[0];
+  data.projects.push(
+    {id:'c1',name:'Crédit A',description:'',type:'credit',target:1000,saved:0},
+    {id:'c2',name:'Crédit B',description:'',type:'credit',target:1000,saved:0}
+  );
+  period.expenses.push(
+    {...period.expenses[0],id:'e1',name:'Mensualité',type:'credit',projectId:'c1',realAmount:30},
+    {...period.expenses[0],id:'e2',name:'Mensualité',type:'credit',projectId:'c2',realAmount:50}
+  );
+  const template=await fs.readFile('src/assets/templates/pecule-budget-template.xlsx');
+  const workbook=await createExcelBudget(data,ExcelJS,template);
+  const rows=[];workbook.worksheets[0].eachRow(row=>rows.push(row.values));
+  assert.ok(rows.some(row=>row[1]==='Crédit · Crédit A'&&row[2]==='Mensualité'&&row[5]==='Réel'&&row[6+Number(period.date.slice(5))-1]===30));
+  assert.ok(rows.some(row=>row[1]==='Crédit · Crédit B'&&row[2]==='Mensualité'&&row[5]==='Réel'&&row[6+Number(period.date.slice(5))-1]===50));
+});

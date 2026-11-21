@@ -9,6 +9,10 @@ test('budget : tableaux réunis sans cartes de synthèse',async()=>{
   assert.match(env.main.innerHTML,/aria-label="Liste des dépenses" tabindex="0"/);
   assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Entrées d’argent"/);
   assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Dépenses et épargne"/);
+  assert.match(env.main.innerHTML,/<th scope="col" class="nz-table-align-end">Ecart<\/th>/);
+  assert.match(env.main.innerHTML,/<th scope="col" class="nz-table-align-end">Disponible<\/th>/);
+  assert.equal((env.main.innerHTML.match(/<th scope="col" class="nz-table-align-end">Actions<\/th>/g)||[]).length,2);
+  assert.match(env.main.innerHTML,/data-action="record-expense"[^>]*aria-label="Pointer Alimentation" title="Pointer Alimentation"/);
   assert.doesNotMatch(env.main.innerHTML,/class="period-metrics"|class="recording-note"/);
   assert.ok(env.main.innerHTML.includes('À renseigner'));
   assert.doesNotMatch(env.main.innerHTML,/Marge minimale souhaitée|data-field="min-margin"/);

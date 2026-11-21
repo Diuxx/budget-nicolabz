@@ -12,8 +12,9 @@ export function createFormDialog({dialog,mutate,showToast}){
     dialog.querySelector('form').addEventListener('submit',event=>{
       event.preventDefault();
       const values=Object.fromEntries(fields.map(field=>{const raw=dialog.querySelector(`[name="${field.name}"]`).value??'';return [field.name,field.type==='number'?(String(raw).trim()===''?null:Number(raw)):String(raw).trim()];}));
-      if(fields.some(field=>field.required!==false&&(values[field.name]===null||values[field.name]===''))){showToast('Complétez les champs obligatoires.',true);return;}
-      if(fields.some(field=>field.type==='number'&&values[field.name]!==null&&!Number.isFinite(values[field.name]))){showToast('Montant invalide.',true);return;}
+      const active=field=>!dialog.querySelector(`[name="${field.name}"]`).disabled;
+      if(fields.some(field=>active(field)&&field.required!==false&&(values[field.name]===null||values[field.name]===''))){showToast('Complétez les champs obligatoires.',true);return;}
+      if(fields.some(field=>active(field)&&field.type==='number'&&values[field.name]!==null&&!Number.isFinite(values[field.name]))){showToast('Montant invalide.',true);return;}
       try{mutate(()=>onSave(values));dialog.open=false;}catch(error){showToast(error.message,true);}
     });
   }

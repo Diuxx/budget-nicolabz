@@ -8,6 +8,7 @@ export const GROUPS = [
 export const PROJECT_TYPES = [
   {value:'savings',label:'Épargne'},
   {value:'financing',label:'Demande de financement'},
+  {value:'credit',label:'Crédit'},
 ];
 export const round = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 export const euro = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(Number(n)||0);

@@ -46,5 +46,5 @@ const dataTools = createDataTools({model,connection,identityApi,resetDialog,impo
 controller.initialize();
 identity.startSessionTracking();
 bindApplicationEvents({model,presentation,controller,budgetForms,managementForms,
-  formDialog,dataTools,identity,dialog,resetDialog,importInput,
+  formDialog,dataTools,identity,dialog,resetDialog,importInput,toggleEntryGroup:budgetViews.toggleEntryGroup,
 });

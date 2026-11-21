@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createEmptyBudget,createBudgetDemo,createPeriod,getPeriod,shiftPeriod,periodTotals,incomeAvailable,deleteIncome} from '../src/scripts/core/period-model.js';
+import {createEmptyBudget,createBudgetDemo,createPeriod,getPeriod,shiftPeriod,periodTotals,incomeAvailable,deleteIncome,creditRepayments,creditProgress} from '../src/scripts/core/period-model.js';
 import {validateData,normalizeImport,loadData} from '../src/scripts/core/storage.js';
 import {createDemoData,monthlyBudget} from '../src/scripts/core/model.js';
 
@@ -39,6 +39,28 @@ test('réel à zéro distinct de non renseigné et indépendant du prévu',()=>{
   p.incomes[0].realAmount=0;const totals=periodTotals(data,p);
   assert.equal(totals.real.income,0);assert.equal(totals.planned.income,3200);assert.equal(totals.recorded,2);
   assert.equal(p.incomes[1].realAmount,null);
+});
+test('remboursements de crédit : réels de tous les mois, dépassement et report',()=>{
+  const data=createBudgetDemo(),p=data.periods[0];
+  data.projects.push({id:'c',name:'Crédit',description:'',type:'credit',target:100,saved:0});
+  p.expenses.push({...p.expenses[0],id:'c1',type:'credit',projectId:'c',plannedAmount:90,realAmount:40});
+  p.expenses.push({...p.expenses[0],id:'c2',type:'credit',projectId:'c',plannedAmount:100,realAmount:null});
+  let progress=creditProgress(data.projects[0],creditRepayments(data));
+  assert.deepEqual(progress,{paid:40,remaining:60,progress:.4});
+  const next=createPeriod(data,shiftPeriod(p.date,1));
+  assert.equal(next.expenses.filter(item=>item.type==='credit').length,2);
+  next.expenses.find(item=>item.type==='credit').realAmount=70;
+  progress=creditProgress(data.projects[0],creditRepayments(data));
+  assert.deepEqual(progress,{paid:110,remaining:0,progress:1});
+  const later=createPeriod(data,shiftPeriod(next.date,1));
+  assert.equal(later.expenses.filter(item=>item.type==='credit').length,0);
+  assert.doesNotThrow(()=>validateData(data));
+  const invalid=structuredClone(data);invalid.periods[0].expenses.find(item=>item.type==='credit').projectId='inconnu';
+  assert.throws(()=>validateData(invalid),/Crédit associé introuvable/);
+  delete invalid.periods[0].expenses.find(item=>item.type==='credit').projectId;
+  assert.throws(()=>validateData(invalid),/Crédit associé introuvable/);
+  data.projects[0].target=0;
+  assert.deepEqual(creditProgress(data.projects[0],creditRepayments(data)),{paid:110,remaining:0,progress:1});
 });
 test('références, cycles, dates et montants invalides refusés',()=>{
   const source=createBudgetDemo();

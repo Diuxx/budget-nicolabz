@@ -1,14 +1,20 @@
 import { marginThresholds } from '../core/margin-thresholds.js';
 import { euro, percent, projectProgress } from '../core/model.js';
+import { creditRepayments, creditProgress } from '../core/period-model.js';
 import { icon, esc, titleRow, btn, actionIcon, empty } from './components.js';
 
 export function createManagementViews({model,presentation,accountSummary}){
   const {period,monYear}=presentation;
   function renderProjects() {
-    const target=model.data.projects.reduce((n,p)=>n+p.target,0),saved=model.data.projects.reduce((n,p)=>n+p.saved,0);
-    return `${titleRow('Projets','Gérez vos objectifs d’épargne et vos demandes de financement.',btn('add-project',icon('plus',16)+' Nouveau projet','primary'))}
+    const objectives=model.data.projects.filter(project=>project.type!=='credit');
+    const target=objectives.reduce((n,p)=>n+p.target,0),saved=objectives.reduce((n,p)=>n+p.saved,0);
+    const repayments=creditRepayments(model.data);
+    return `${titleRow('Projets','Gérez vos objectifs d’épargne, vos demandes de financement et vos crédits.',btn('add-project',icon('plus',16)+' Nouveau projet','primary'))}
     <div class="kpi-grid two"><div class="small-kpi"><small>Montant total des objectifs</small><strong>${euro(target)}</strong></div><div class="small-kpi"><small>Épargne / apport constitué</small><strong>${euro(saved)}</strong></div></div>
-    <div class="project-cards">${model.data.projects.map((p,i)=>`<section class="panel funding-card"><div class="funding-top"><span class="funding-icon">${icon(i%3===0?'motorcycle':i%3===1?'piggy':'briefcase',26)}</span><div><h2>${esc(p.name)}</h2><p>${p.type==='financing'?'Demande de financement':'Épargne'}</p><p>${esc(p.description||'Objectif personnel')}</p></div><span class="spacer"></span>${actionIcon('edit-project','edit','Modifier le projet',`data-id="${esc(p.id)}"`)}${actionIcon('delete-project','trash','Supprimer le projet',`data-id="${esc(p.id)}"`)}</div><div class="funding-values"><strong>${euro(p.saved)}</strong><span>sur ${euro(p.target)}</span></div><wa-progress-bar class="large" value="${projectProgress(p)*100}" aria-label="Projet financé à ${Math.round(projectProgress(p)*100)} %"></wa-progress-bar><div class="funding-footer"><span>${percent(projectProgress(p))} épargné</span><span>Reste ${euro(Math.max(0,p.target-p.saved))}</span></div>${p.type==='financing'?`<p class="help-note">Prêt demandé : ${euro(p.loanAmount)} · ${p.loanMonths} mois · ${euro(p.loanPayment)} / mois</p>`:''}</section>`).join('')||empty('Aucun projet','Ajoutez un objectif : moto, voyage, PC ou épargne de précaution.',btn('add-project','Créer mon premier projet','primary'))}</div>
+    <div class="project-cards">${model.data.projects.map((p,i)=>{
+      const credit=p.type==='credit'?creditProgress(p,repayments):null;
+      return `<section class="panel funding-card"><div class="funding-top"><span class="funding-icon">${icon(credit?'credit':i%3===0?'motorcycle':i%3===1?'piggy':'briefcase',26)}</span><div><h2>${esc(p.name)}</h2><p>${credit?'Crédit':p.type==='financing'?'Demande de financement':'Épargne'}</p><p>${esc(p.description||'Objectif personnel')}</p></div><span class="spacer"></span>${actionIcon('edit-project','edit','Modifier le projet',`data-id="${esc(p.id)}"`)}${actionIcon('delete-project','trash','Supprimer le projet',`data-id="${esc(p.id)}"`)}</div>${credit?`<div class="funding-values"><strong>${euro(credit.paid)}</strong><span>remboursé sur ${euro(p.target)}</span></div><wa-progress-bar class="large" value="${credit.progress*100}" aria-label="Crédit remboursé à ${Math.round(credit.progress*100)} %"></wa-progress-bar><div class="funding-footer"><span>${percent(credit.progress)} remboursé</span><span>Reste ${euro(credit.remaining)}</span></div>`:`<div class="funding-values"><strong>${euro(p.saved)}</strong><span>sur ${euro(p.target)}</span></div><wa-progress-bar class="large" value="${projectProgress(p)*100}" aria-label="Projet financé à ${Math.round(projectProgress(p)*100)} %"></wa-progress-bar><div class="funding-footer"><span>${percent(projectProgress(p))} épargné</span><span>Reste ${euro(Math.max(0,p.target-p.saved))}</span></div>${p.type==='financing'?`<p class="help-note">Prêt demandé : ${euro(p.loanAmount)} · ${p.loanMonths} mois · ${euro(p.loanPayment)} / mois</p>`:''}`}</section>`;
+    }).join('')||empty('Aucun projet','Ajoutez un objectif : moto, voyage, PC ou épargne de précaution.',btn('add-project','Créer mon premier projet','primary'))}</div>
     <p class="help-note">L’épargne et l’apport sont renseignés par vos soins. Les versements prévus dans le budget sont conservés à part : aucun double comptage.</p>`;
   }
 

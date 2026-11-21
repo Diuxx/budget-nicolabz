@@ -11,6 +11,15 @@ test('Pécule v1 : aller-retour JSON sans perte, y compris les financements',asy
   assert.deepEqual(normalizeImport(imported),data);
 });
 
+test('un projet de type crédit est conservé dans les sauvegardes',async()=>{
+  const data=createBudgetDemo();
+  data.projects.push({id:'credit-auto',name:'Crédit auto',description:'',type:'credit',target:12500,saved:0});
+  data.periods[0].expenses.push({...data.periods[0].expenses[0],id:'payment',type:'credit',projectId:'credit-auto'});
+  const imported=await readImport({name:'budget.json',size:1000,text:async()=>JSON.stringify(data)});
+  assert.deepEqual(imported,data);
+  assert.deepEqual(normalizeImport(imported),data);
+});
+
 test('les exports v4 sont convertis en v1 sans modifier la source',()=>{
   const old={...createBudgetDemo(),version:4};
   const converted=normalizeImport(old);

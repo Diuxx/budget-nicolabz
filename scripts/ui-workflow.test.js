@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {environment} from './ui-test-env.js';
 import {createBudgetDemo,createPeriod,shiftPeriod} from '../src/scripts/core/period-model.js';
+import {euro} from '../src/scripts/core/model.js';
 
 for(const scenario of ['creation','confirmation','annulation']){
   test(`report du budget : ${scenario}`,async()=>{
@@ -50,6 +51,111 @@ test('la duplication crée une ligne non pointée et conserve le financement',as
   }
 });
 
+test('création et modification d’un crédit avec son montant à rembourser',async()=>{
+  const env=environment('projects');await import('../src/scripts/ui/app.js?credit-project');
+  const periods=env.saved().periods;
+  env.action('add-project');
+  assert.match(env.dialog.html,/<wa-option value="credit"[^>]*>Crédit<\/wa-option>/);
+  env.controls.name.value='Crédit auto';
+  env.controls.type.value='credit';env.controls.type.change();
+  assert.equal(env.controls.target.label,'Montant à rembourser (€)');
+  assert.equal(env.controls.saved.disabled,true);
+  assert.equal(env.controls.loanAmount.disabled,true);
+  env.controls.target.value='12500.50';
+  env.controls.saved.value='';
+  env.submit();
+  assert.equal(env.dialog.open,false);
+  let project=env.saved().projects[0];
+  assert.equal(project.type,'credit');
+  assert.equal(project.target,12500.5);
+  assert.equal(project.saved,0);
+  assert.deepEqual(env.saved().periods,periods);
+  assert.match(env.main.innerHTML,/Crédit auto/);
+  assert.match(env.main.innerHTML,/remboursé sur/);
+  assert.match(env.main.innerHTML,new RegExp(euro(12500.5)));
+  assert.doesNotMatch(env.main.innerHTML,/Projet financé à/);
+  assert.match(env.main.innerHTML,new RegExp(`Montant total des objectifs</small><strong>${euro(0)}`));
+  env.action('edit-project',project.id);
+  assert.equal(env.controls.target.label,'Montant à rembourser (€)');
+  env.controls.target.value='0';env.submit();
+  project=env.saved().projects[0];
+  assert.equal(project.target,0);
+  env.action('edit-project',project.id);
+  env.controls.type.value='savings';env.controls.type.change();
+  assert.equal(env.controls.saved.disabled,false);
+  assert.equal(env.controls.target.label,'Montant cible du projet (€)');
+  env.controls.saved.value='';env.submit();
+  assert.equal(env.dialog.open,true);
+  assert.match(env.toast.textContent,/Complétez les champs obligatoires/);
+  assert.equal(env.saved().projects[0].type,'credit');
+  const dashboard=environment('dashboard',env.saved());
+  await import('../src/scripts/ui/app.js?credit-dashboard');
+  assert.match(dashboard.main.innerHTML,/À rembourser/);
+  assert.doesNotMatch(dashboard.main.innerHTML,/Progression de Crédit auto/);
+});
+
+test('les dépenses liées remboursent les crédits pointés et restent modifiables une fois soldés',async()=>{
+  const data=createBudgetDemo(),period=data.periods[0];
+  data.projects.push(
+    {id:'auto',name:'Auto',description:'',type:'credit',target:1000,saved:0},
+    {id:'fini',name:'Terminé',description:'',type:'credit',target:100,saved:0}
+  );
+  period.expenses.push({...period.expenses[0],id:'paid-credit',name:'Ancienne mensualité',type:'credit',projectId:'fini',plannedAmount:100,realAmount:100});
+  const env=environment('budget',data);await import('../src/scripts/ui/app.js?credit-expenses');
+  env.action('add-expense');
+  assert.match(env.dialog.html,/<wa-option value="credit:auto"[^>]*>Crédit - Auto<\/wa-option>/);
+  assert.doesNotMatch(env.dialog.html,/Crédit - Terminé/);
+  env.controls.name.value='Mensualité auto';env.controls.type.value='credit:auto';env.controls.plannedAmount.value='700';env.controls.realAmount.value='';
+  env.submit();
+  let expense=env.saved().periods[0].expenses.at(-1);
+  assert.equal(expense.type,'credit');assert.equal(expense.projectId,'auto');
+  assert.match(env.main.innerHTML,/Crédit · Auto/);
+  env.action('view-projects');
+  assert.match(env.main.innerHTML,new RegExp(`remboursé sur ${euro(1000)}`));
+  assert.match(env.main.innerHTML,new RegExp(`Reste ${euro(1000)}`));
+  env.action('view-budget');env.action('record-expense',expense.id);
+  env.controls.realAmount.value='1000';env.submit();
+  env.action('duplicate-expense',expense.id);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.match(env.toast.textContent,/déjà remboursé/);
+  assert.equal(env.saved().periods[0].expenses.filter(item=>item.projectId==='auto').length,1);
+  env.action('view-projects');
+  assert.match(env.main.innerHTML,/Crédit remboursé à 100 %/);
+  assert.match(env.main.innerHTML,new RegExp(`Reste ${euro(0)}`));
+  env.action('delete-project','auto');
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.match(env.toast.textContent,/utilisé dans le budget/);
+  assert.ok(env.saved().projects.some(project=>project.id==='auto'));
+  env.action('edit-project','auto');
+  env.controls.type.value='savings';env.controls.type.change();env.submit();
+  assert.match(env.toast.textContent,/utilisé dans le budget/);
+  assert.equal(env.saved().projects[0].type,'credit');
+  env.action('view-budget');env.action('add-expense');
+  assert.doesNotMatch(env.dialog.html,/Crédit - Auto/);
+  env.action('edit-expense',expense.id);
+  assert.match(env.dialog.html,/<wa-option value="credit:auto"[^>]*selected[^>]*>Crédit - Auto<\/wa-option>/);
+  env.controls.realAmount.value='250';env.submit();
+  assert.equal(env.saved().periods[0].expenses.find(item=>item.id===expense.id).projectId,'auto');
+  env.action('add-expense');
+  assert.match(env.dialog.html,/Crédit - Auto/);
+  env.action('edit-expense',expense.id);
+  env.controls.type.value='variable';env.submit();
+  expense=env.saved().periods[0].expenses.find(item=>item.id===expense.id);
+  assert.equal(expense.type,'variable');assert.equal(Object.hasOwn(expense,'projectId'),false);
+});
+
+test('la préparation du mois annonce que les crédits soldés ne sont pas reportés',async()=>{
+  const data=createBudgetDemo(),period=data.periods[0];
+  data.projects.push({id:'c',name:'Crédit',description:'',type:'credit',target:100,saved:0});
+  period.expenses.push({...period.expenses[0],id:'credit-payment',type:'credit',projectId:'c',realAmount:100});
+  const env=environment('budget',data);await import('../src/scripts/ui/app.js?credit-carry-notice');
+  env.action('next-month');
+  assert.match(env.main.innerHTML,/Les crédits soldés ne seront pas reportés/);
+  env.action('create-period');
+  assert.match(env.toast.textContent,/Les crédits soldés ne sont pas reportés/);
+  assert.ok(env.saved().periods[1].expenses.every(item=>item.type!=='credit'));
+});
+
 test('parcours mensuel : copie, saisie prévu/réel, financement et sauvegarde',async()=>{
   const env=environment();await import('../src/scripts/ui/app.js?workflow-refactor');
   const date=env.saved().periods[0].date;
@@ -87,6 +193,39 @@ test('filtre Todo par origine de financement et présente les cumuls annuels san
   assert.deepEqual(env.saved(),before);
 });
 
+test('les sous-totaux se replient indépendamment et restent repliés après un rendu',async()=>{
+  const data=createBudgetDemo(),period=data.periods[0];
+  period.expenses[0].realAmount=0;
+  const env=environment('budget',data);
+  await import('../src/scripts/ui/app.js?collapsible-subtotals');
+  const before=env.saved(),rows={hidden:false};
+  const attributes={'aria-controls':'budget-expense-group-0','aria-expanded':'true'};
+  const button={
+    dataset:{action:'toggle-entry-group',groupKey:JSON.stringify([period.date,'expense','main',false]),groupLabel:'les dépenses non pointées de Compte principal'},
+    closest:selector=>selector==='[data-action]'?button:null,
+    getAttribute:name=>attributes[name],
+    setAttribute:(name,value)=>{attributes[name]=value;},
+  };
+  document.getElementById=id=>{assert.equal(id,attributes['aria-controls']);return rows;};
+  env.click(button);
+  assert.equal(rows.hidden,true);
+  assert.equal(attributes['aria-expanded'],'false');
+  assert.match(attributes['aria-label'],/^Déplier/);
+  env.change({id:'fundingFilter',value:'account:main'});
+  assert.match(env.main.innerHTML,/<tbody id="budget-expense-group-0" hidden>/);
+  assert.match(env.main.innerHTML,/<tbody id="budget-expense-group-1">/);
+  assert.match(env.main.innerHTML,/<tbody id="budget-income-group-0">/);
+  assert.match(env.main.innerHTML,/aria-expanded="false" aria-label="Déplier les dépenses non pointées/);
+  assert.deepEqual(env.saved(),before);
+  env.click(button);
+  assert.equal(rows.hidden,false);
+  assert.equal(attributes['aria-expanded'],'true');
+  assert.match(attributes['aria-label'],/^Replier/);
+  env.change({id:'fundingFilter',value:'all'});
+  assert.match(env.main.innerHTML,/<tbody id="budget-expense-group-0">/);
+  assert.deepEqual(env.saved(),before);
+});
+
 test('pointage limité aux montants et note, sans modification des autres informations',async()=>{
   const env=environment();await import('../src/scripts/ui/app.js?record-minimal');
   for(const [kind,collection,id] of [['income','incomes','demo-savings'],['expense','expenses','demo-expense-1']]){
@@ -102,6 +241,19 @@ test('pointage limité aux montants et note, sans modification des autres inform
     env.action('edit-'+kind,id);
     assert.match(env.dialog.html,/name="accountId"/);
     assert.equal(env.controls.note.value,'À vérifier');
+  }
+});
+
+test('le tableau de bord propose le pointage rapide des revenus et dépenses à renseigner',async()=>{
+  const env=environment('dashboard');await import('../src/scripts/ui/app.js?dashboard-record');
+  for(const [kind,collection,id,name] of [['income','incomes','demo-savings','Épargne de précaution'],['expense','expenses','demo-expense-1','Alimentation']]){
+    const before=env.saved().periods[0][collection].find(item=>item.id===id);
+    assert.match(env.main.innerHTML,new RegExp(`data-action="record-${kind}" aria-label="Pointer ${name}"[^>]*data-id="${id}"`));
+    env.action('record-'+kind,id);
+    assert.deepEqual(Array.from(env.dialog.html.matchAll(/name="([^"]+)"/g),match=>match[1]),['plannedAmount','realAmount','note']);
+    env.controls.realAmount.value='42';env.submit();
+    assert.deepEqual(env.saved().periods[0][collection].find(item=>item.id===id),{...before,realAmount:42,note:''});
+    assert.doesNotMatch(env.main.innerHTML,new RegExp(`data-action="record-${kind}"[^>]*data-id="${id}"`));
   }
 });
 

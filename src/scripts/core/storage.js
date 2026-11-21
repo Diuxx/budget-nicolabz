@@ -21,6 +21,7 @@ export function validateData(data) {
   list(data.expenseCategories,'Catégories',item=>assert(text(item.name),'Catégorie invalide.'));
   assert(Array.isArray(data.periods)&&data.periods.length<=12000,'Périodes invalides.');
   const dates=new Set(),accountIds=new Set(data.accounts.map(item=>item.id)),typeIds=new Set(data.incomeTypes.map(item=>item.id)),categoryIds=new Set(data.expenseCategories.map(item=>item.id));
+  const creditIds=new Set(data.projects.filter(project=>project.type==='credit').map(project=>project.id));
   for(const period of data.periods){
     assert(plain(period)&&/^[1-9]\d{3}-(0[1-9]|1[0-2])$/.test(period.date)&&!dates.has(period.date),'Mois invalide ou dupliqué.');dates.add(period.date);
     // Anciennes sauvegardes v4 : conserver cet ancien réglage sans l'utiliser.
@@ -38,13 +39,14 @@ export function validateData(data) {
       while(parent!==null){assert(incomes.has(parent)&&!visited.has(parent),'Lien de financement invalide ou circulaire.');visited.add(parent);parent=incomes.get(parent).deductedFromIncomeId;}
     }
     list(period.expenses,'Dépenses',item=>{
-      entry(item);assert(['fixed','variable','savings'].includes(item.type)&&categoryIds.has(item.categoryId),'Type ou catégorie de dépense invalide.');
+      entry(item);assert(['fixed','variable','savings','credit'].includes(item.type)&&categoryIds.has(item.categoryId),'Type ou catégorie de dépense invalide.');
+      if(item.type==='credit')assert(creditIds.has(item.projectId),'Crédit associé introuvable.');
       assert(typeof item.note==='string'&&item.note.length<=1000,'Note invalide.');
       assert(item.incomeId===null||(incomes.has(item.incomeId)&&incomes.get(item.incomeId).accountId===item.accountId),'Revenu de financement incompatible avec le compte.');
     });
   }
   list(data.projects,'Projets',project=>{
-    assert(text(project.name)&&typeof project.description==='string'&&project.description.length<=500&&['savings','financing'].includes(project.type)&&number(project.target)&&number(project.saved),'Projet invalide.');
+    assert(text(project.name)&&typeof project.description==='string'&&project.description.length<=500&&['savings','financing','credit'].includes(project.type)&&number(project.target)&&number(project.saved),'Projet invalide.');
     if(project.type==='financing')assert(number(project.loanAmount)&&number(project.loanPayment)&&Number.isInteger(project.loanMonths)&&project.loanMonths>0,'Conditions de financement invalides.');
   });
   assert(Array.isArray(data.legacyTransactions),'Archives de transactions invalides.');
