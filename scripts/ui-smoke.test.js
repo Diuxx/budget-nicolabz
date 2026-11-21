@@ -7,8 +7,8 @@ test('budget : tableaux réunis sans cartes de synthèse',async()=>{
   assert.match(env.main.innerHTML,/<div class="budget-ledgers">[\s\S]*Entrées d’argent[\s\S]*Dépenses et épargne/);
   assert.match(env.main.innerHTML,/aria-label="Liste des revenus" tabindex="0"/);
   assert.match(env.main.innerHTML,/aria-label="Liste des dépenses" tabindex="0"/);
-  assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Entrées d’argent"/);
-  assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Dépenses et épargne"/);
+  assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Entrées d’argent" data-kind="income"/);
+  assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Dépenses et épargne" data-kind="expense"/);
   assert.match(env.main.innerHTML,/<th scope="col" class="nz-table-align-end">Ecart<\/th>/);
   assert.match(env.main.innerHTML,/<th scope="col" class="nz-table-align-end">Disponible<\/th>/);
   assert.equal((env.main.innerHTML.match(/<th scope="col" class="nz-table-align-end">Actions<\/th>/g)||[]).length,2);

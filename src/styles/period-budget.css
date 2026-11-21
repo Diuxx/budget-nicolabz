@@ -66,6 +66,10 @@
   .budget-ledgers .period-table th:nth-child(3), .budget-ledgers .period-table th:nth-child(4) { width: 12%; }
   .budget-ledgers .period-table th:nth-child(5) { width: 17%; }
   .budget-ledgers .period-table th:nth-child(6) { width: 18%; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(1),
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(2) { width: 19%; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(5) { width: 10%; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(6) { width: 28%; }
   .budget-ledgers .entry-actions { flex-wrap: wrap; gap: 3px; }
 }
 .ledger-account th { color: var(--sage); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
@@ -90,8 +94,29 @@
 @media (max-width: 590px) {
   .budget-ledgers .period-table, .budget-ledgers .period-table td:first-child strong { font-size: 10px; }
   .budget-ledgers .period-table thead th, .budget-ledgers .period-table small { font-size: 9px; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(1) { width: 16%; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(2) { width: 15%; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(3),
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(4) { width: 14%; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(5) { width: 13%; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(6) { width: 28%; }
   .budget-ledgers .entry-actions .button[data-action^="record-"] { width: 27px; min-height: 27px; padding: 0; justify-content: center; }
   .budget-ledgers .entry-actions .button[data-action^="record-"] span { display: none; }
+}
+@media (max-width: 520px) {
+  .budget-ledgers .period-table[data-kind="expense"] .entry-actions { display: grid; grid-template-columns: repeat(2, 27px); }
+  .budget-ledgers .period-table[data-kind="expense"] [data-action="record-expense"] { grid-area: 1 / 1; }
+  .budget-ledgers .period-table[data-kind="expense"] [data-action="edit-expense"] { grid-area: 1 / 2; }
+  .budget-ledgers .period-table[data-kind="expense"] [data-action="duplicate-expense"] { grid-area: 2 / 1; }
+  .budget-ledgers .period-table[data-kind="expense"] [data-action="delete-expense"] { grid-area: 2 / 2; }
+}
+@media (min-width: 591px) and (max-width: 1099px) {
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(5) { width: 10%; }
+  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(6) { width: 25%; }
+}
+@media (min-width: 591px) and (max-width: 800px), (min-width: 1100px) and (max-width: 1450px) {
+  .budget-ledgers .period-table[data-kind="expense"] .entry-actions .button[data-action^="record-"] { width: 27px; min-height: 27px; padding: 0; justify-content: center; }
+  .budget-ledgers .period-table[data-kind="expense"] .entry-actions .button[data-action^="record-"] span { display: none; }
 }
 .unrecorded { color: #b42318; font-size: 11px; font-weight: 700; }
 :root[data-theme="dark"] .unrecorded { color: var(--danger); }

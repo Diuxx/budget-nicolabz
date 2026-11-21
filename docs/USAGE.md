@@ -40,7 +40,7 @@ from recorded entries, not bank balances.
 Use the arrow on a subtotal row to collapse or expand its entries. Income,
 recorded expenses, and unrecorded expenses are controlled independently.
 The selection remains in effect while using the app, but resets on reload.
-On small screens, the checkmark action records an entry's actual amount.
+In compact table layouts, the checkmark action records an entry's actual amount.
 
 In **Projets**, a credit project stores the amount to repay separately from
 savings and financing objectives. In Budget, select **Crédit - [name]** as an
