@@ -12,6 +12,7 @@ test('budget : tableaux réunis sans cartes de synthèse',async()=>{
   assert.match(env.main.innerHTML,/<th scope="col" class="nz-table-align-end">Ecart<\/th>/);
   assert.match(env.main.innerHTML,/<th scope="col" class="nz-table-align-end">Disponible<\/th>/);
   assert.equal((env.main.innerHTML.match(/<th scope="col" class="nz-table-align-end">Actions<\/th>/g)||[]).length,2);
+  assert.match(env.main.innerHTML,/data-action="record-income"[^>]*aria-label="Pointer Épargne de précaution" title="Pointer Épargne de précaution"/);
   assert.match(env.main.innerHTML,/data-action="record-expense"[^>]*aria-label="Pointer Alimentation" title="Pointer Alimentation"/);
   assert.doesNotMatch(env.main.innerHTML,/class="period-metrics"|class="recording-note"/);
   assert.ok(env.main.innerHTML.includes('À renseigner'));
