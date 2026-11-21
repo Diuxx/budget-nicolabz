@@ -21,11 +21,10 @@
 }
 .period-metric { padding: 15px; min-width: 0; }
 .metric-heading { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; margin-bottom: 13px; }
-.metric-values { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.metric-values > div { display: grid; gap: 4px; min-width: 0; max-width: 100%; }
-.metric-values small { color: var(--muted); font-size: 10px; }
-.metric-values strong { font-size: clamp(17px,1.6vw,23px); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
-.metric-values > div:last-child strong { color: var(--sage); }
+.summary-metric-values { display: grid; gap: 4px; min-width: 0; }
+.summary-metric-values small { color: var(--muted); font-size: 10px; }
+.summary-metric-values strong { font-size: clamp(17px,1.6vw,23px); letter-spacing: -.04em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.summary-metric-values .metric-real { color: var(--sage); }
 .recording-note { color: var(--muted); font-size: 11px; margin: 10px 0 20px; }
 .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--card-gap); }
 .overview-panel { padding: 16px; margin-bottom: 12px; }
@@ -126,7 +125,7 @@ wa-dialog#modal { --width: min(570px,calc(100vw - 28px)); }
 .modal-form .form-fields > :first-child,.modal-form wa-textarea { grid-column: 1 / -1; }
 .modal-form .form-control { min-width: 0; }
 .modal-copy { margin-top: 15px; }
-@media(max-width:1190px){.period-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}.metric-values strong{font-size:21px;}}
+@media(max-width:1190px){.period-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:880px){.overview-grid{grid-template-columns:1fr;}.project-overview{grid-template-columns:1fr;gap:16px;}.reference-grid{grid-template-columns:1fr;}.view-toolbar{gap:12px;}}
 @media(max-width:590px){.period-metrics{grid-template-columns:1fr;}.period-metric{padding:13px;}.metric-heading{margin-bottom:9px;}.period-empty{padding:22px 16px;margin:16px auto;}.period-empty h2{font-size:20px;}.modal-form .form-fields{grid-template-columns:1fr;}.year-bars{gap:4px;}.year-bar-month small{font-size:8px;}.account-summary-row{gap:8px;font-size:11px;}#fundingFilter{width:100%;}.view-toolbar>.inline-actions{width:100%;justify-content:space-between;}}
 

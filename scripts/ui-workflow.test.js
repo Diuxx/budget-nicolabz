@@ -257,6 +257,30 @@ test('le tableau de bord propose le pointage rapide des revenus et dépenses à 
   }
 });
 
+test('les cartes du tableau de bord mettent le réel en avant uniquement quand leurs lignes sont renseignées',async()=>{
+  const data=createBudgetDemo();
+  data.periods[0].incomes[0].realAmount=0;
+  const env=environment('dashboard',data);await import('../src/scripts/ui/app.js?dashboard-metric-completion');
+  const card=label=>[...env.main.innerHTML.matchAll(/<section class="panel period-metric">([\s\S]*?)<\/section>/g)].map(match=>match[1]).find(html=>html.includes(`<span>${label}</span>`));
+  const verify=(label,primary,amount,secondary,other)=>{
+    const html=card(label);
+    assert.ok(html,`Carte absente : ${label}`);
+    assert.ok(html.includes(`<small>${primary}</small>`));
+    assert.ok(html.includes(`<strong class="metric-${primary==='Prévu'?'planned':'real'}">${euro(amount)}</strong>`));
+    assert.ok(html.includes(`<small>${secondary} : ${euro(other)}</small>`));
+  };
+  verify('Revenus','Réel saisi',0,'Prévu',3200);
+  verify('Dépenses','Prévu',1180,'Réel saisi',700);
+  verify('Épargne / projets','Prévu',350,'Réel saisi',0);
+  verify('Marge disponible','Prévu',1670,'Réel saisi',-700);
+  for(const [kind,id] of [['income','demo-savings'],['expense','demo-expense-1'],['expense','demo-expense-2']]){
+    env.action('record-'+kind,id);env.controls.realAmount.value='0';env.submit();
+  }
+  verify('Dépenses','Réel saisi',700,'Prévu',1180);
+  verify('Épargne / projets','Réel saisi',0,'Prévu',350);
+  verify('Marge disponible','Réel saisi',-700,'Prévu',1670);
+});
+
 test('ouvrir un mois depuis les analyses mémorise la période et réinitialise le filtre',async()=>{
   const env=environment();await import('../src/scripts/ui/app.js?open-period-review');
   const source=env.saved().periods[0].date;

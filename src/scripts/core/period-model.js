@@ -67,17 +67,34 @@ export function incomeAvailable(period,incomeId,field='plannedAmount') {
   if(!income)return 0;
   return round(amount(income,field)-sum(period.incomes.filter(item=>item.deductedFromIncomeId===incomeId),field)-sum(period.expenses.filter(item=>item.incomeId===incomeId),field));
 }
+function periodEntryGroups(data,period) {
+  const savingTypes=new Set(data.incomeTypes.filter(type=>type.saving).map(type=>type.id));
+  return {
+    income:period.incomes.filter(item=>!item.deductedFromIncomeId),
+    expenses:period.expenses.filter(item=>item.type!=='savings'),
+    savingsIncomes:period.incomes.filter(item=>savingTypes.has(item.typeId)),
+    savingsExpenses:period.expenses.filter(item=>item.type==='savings'),
+  };
+}
+export function periodMetricEntries(data,period) {
+  const {income,expenses,savingsIncomes,savingsExpenses}=periodEntryGroups(data,period);
+  const savingIds=new Set(savingsIncomes.map(item=>item.id));
+  const savings=[...new Set([
+    ...savingsIncomes,...period.incomes.filter(item=>savingIds.has(item.deductedFromIncomeId)),
+    ...savingsExpenses,...expenses.filter(item=>savingIds.has(item.incomeId)),
+  ])];
+  return {income,expenses,savings,margin:[...new Set([...income,...expenses,...savings])]};
+}
 export function periodTotals(data,period) {
   const empty={income:0,expenses:0,savings:0,outflow:0,margin:0};
   if(!period)return {planned:{...empty},real:{...empty},recorded:0,entries:0};
-  const savingTypes=new Set(data.incomeTypes.filter(type=>type.saving).map(type=>type.id));
+  const {income,expenses,savingsIncomes,savingsExpenses}=periodEntryGroups(data,period);
   const total=field=>{
-    const income=sum(period.incomes.filter(item=>!item.deductedFromIncomeId),field);
-    const expenses=sum(period.expenses.filter(item=>item.type!=='savings'),field);
-    const reserves=period.incomes.filter(item=>savingTypes.has(item.typeId)).reduce((total,item)=>total+Math.max(0,incomeAvailable(period,item.id,field)),0);
-    const savings=round(sum(period.expenses.filter(item=>item.type==='savings'),field)+reserves);
-    const outflow=round(expenses+savings);
-    return {income,expenses,savings,outflow,margin:round(income-outflow)};
+    const incomeTotal=sum(income,field),expensesTotal=sum(expenses,field);
+    const reserves=savingsIncomes.reduce((total,item)=>total+Math.max(0,incomeAvailable(period,item.id,field)),0);
+    const savings=round(sum(savingsExpenses,field)+reserves);
+    const outflow=round(expensesTotal+savings);
+    return {income:incomeTotal,expenses:expensesTotal,savings,outflow,margin:round(incomeTotal-outflow)};
   };
   const entries=[...period.incomes,...period.expenses];
   return {planned:total('plannedAmount'),real:total('realAmount'),recorded:entries.filter(item=>item.realAmount!==null).length,entries:entries.length};

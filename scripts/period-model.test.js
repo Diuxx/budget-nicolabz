@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createEmptyBudget,createBudgetDemo,createPeriod,getPeriod,shiftPeriod,periodTotals,incomeAvailable,deleteIncome,creditRepayments,creditProgress} from '../src/scripts/core/period-model.js';
+import {createEmptyBudget,createBudgetDemo,createPeriod,getPeriod,shiftPeriod,periodTotals,periodMetricEntries,incomeAvailable,deleteIncome,creditRepayments,creditProgress} from '../src/scripts/core/period-model.js';
 import {validateData,normalizeImport,loadData} from '../src/scripts/core/storage.js';
 import {createDemoData,monthlyBudget} from '../src/scripts/core/model.js';
 
@@ -39,6 +39,21 @@ test('réel à zéro distinct de non renseigné et indépendant du prévu',()=>{
   p.incomes[0].realAmount=0;const totals=periodTotals(data,p);
   assert.equal(totals.real.income,0);assert.equal(totals.planned.income,3200);assert.equal(totals.recorded,2);
   assert.equal(p.incomes[1].realAmount,null);
+});
+test('les cartes suivent uniquement les lignes qui affectent leurs montants',()=>{
+  const data=createBudgetDemo(),p=data.periods[0];
+  p.incomes[1].realAmount=0;
+  const expense={...p.expenses[0],id:'saving-expense',accountId:'livret',incomeId:'demo-savings',realAmount:null};
+  p.expenses.push(expense);
+  const groups=periodMetricEntries(data,p);
+  assert.ok(groups.income.every(item=>item.realAmount!==null));
+  assert.ok(groups.savings.includes(expense));
+  assert.ok(groups.margin.includes(expense));
+  assert.ok(!groups.savings.every(item=>item.realAmount!==null));
+  expense.realAmount=0;
+  assert.ok(groups.savings.every(item=>item.realAmount!==null));
+  const empty=periodMetricEntries(data,{incomes:[],expenses:[]});
+  assert.deepEqual(empty,{income:[],expenses:[],savings:[],margin:[]});
 });
 test('remboursements de crédit : réels de tous les mois, dépassement et report',()=>{
   const data=createBudgetDemo(),p=data.periods[0];

@@ -27,6 +27,11 @@ amounts and dates. Browsing an absent month does not create data. Preparing a
 month copies the previous month's plans without actual amounts; copying a
 budget to an existing next month requires confirmation.
 
+On the dashboard and in the annual view, each summary card emphasizes the
+planned amount until all entries affecting that card have actual amounts. It
+then emphasizes the actual amount, with the planned amount shown beneath it.
+Annual cards include only prepared months of the selected year.
+
 Entries belong to accounts and can be linked to funding income. Internal
 transfers are excluded from external income totals. Annual savings by income
 type do not count savings expenses a second time. Actual balances are estimates
