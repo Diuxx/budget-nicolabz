@@ -20,6 +20,10 @@ Tests use Node.js's test runner. The build generates the static site in
 `dist/`. Both commands regenerate the public JSON schema and import template
 in `src/assets/schemas/` from the budget model.
 
+Notifications and confirmation prompts float at the top left of the screen.
+Success messages are green, errors are red, and confirmations are amber.
+Browsers supporting the Popover API also display them above open dialogs.
+
 ## Budgeting
 
 Each month has independent income and expense entries with planned and actual
@@ -41,6 +45,8 @@ Use the arrow on a subtotal row to collapse or expand its entries. Income,
 recorded expenses, and unrecorded expenses are controlled independently.
 The selection remains in effect while using the app, but resets on reload.
 In compact table layouts, the checkmark action records an entry's actual amount.
+On mobile, `?` marks an actual amount that has not been entered, and the income
+table hides the type and origin column.
 
 In **Projets**, a credit project stores the amount to repay separately from
 savings and financing objectives. In Budget, select **Crédit - [name]** as an

@@ -14,6 +14,8 @@ test('budget : tableaux réunis sans cartes de synthèse',async()=>{
   assert.equal((env.main.innerHTML.match(/<th scope="col" class="nz-table-align-end">Actions<\/th>/g)||[]).length,2);
   assert.match(env.main.innerHTML,/data-action="record-income"[^>]*aria-label="Pointer Épargne de précaution" title="Pointer Épargne de précaution"/);
   assert.match(env.main.innerHTML,/data-action="record-expense"[^>]*aria-label="Pointer Alimentation" title="Pointer Alimentation"/);
+  assert.match(env.main.innerHTML,/<span class="unrecorded-text">À renseigner<\/span><span class="unrecorded-short" aria-hidden="true">\?<\/span>/);
+  assert.match(env.main.innerHTML,/<th scope="row" colspan="2" class="ledger-label-wide">Compte principal · Sous-total<\/th><th scope="row" class="ledger-label-mobile">Compte principal · Sous-total<\/th>/);
   assert.doesNotMatch(env.main.innerHTML,/class="period-metrics"|class="recording-note"/);
   assert.ok(env.main.innerHTML.includes('À renseigner'));
   assert.doesNotMatch(env.main.innerHTML,/Marge minimale souhaitée|data-field="min-margin"/);

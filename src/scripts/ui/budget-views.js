@@ -99,7 +99,11 @@ export function createBudgetViews({model,presentation}){
     const balance=balances
       ? availableAmounts({planned:total(balances,item=>item.planned),real:total(balances,item=>item.real)})
       : recorded.length?euro(total(recorded,item=>item.realAmount-item.plannedAmount)):'—';
-    return `<tr class="ledger-account nz-table-group"><th scope="row" colspan="2">${esc(account.name)} · Sous-total</th><td class="nz-table-align-end">${planned}</td><td class="nz-table-align-end">${real}</td><td class="nz-table-align-end">${balance}</td><td><div class="entry-actions"><button type="button" class="ledger-toggle" data-action="toggle-entry-group" data-group-key="${esc(groupKey)}" data-group-label="${esc(groupLabel)}" aria-controls="${groupId}" aria-expanded="${!collapsed}" aria-label="${collapsed?'Déplier':'Replier'} ${esc(groupLabel)}" title="${collapsed?'Déplier':'Replier'} ${esc(groupLabel)}">${icon('chevron',14)}</button></div></td></tr>`;
+    const label=`${esc(account.name)} · Sous-total`;
+    const heading=kind==='income'
+      ? `<th scope="row" colspan="2" class="ledger-label-wide">${label}</th><th scope="row" class="ledger-label-mobile">${label}</th>`
+      : `<th scope="row" colspan="2">${label}</th>`;
+    return `<tr class="ledger-account nz-table-group">${heading}<td class="nz-table-align-end">${planned}</td><td class="nz-table-align-end">${real}</td><td class="nz-table-align-end">${balance}</td><td><div class="entry-actions"><button type="button" class="ledger-toggle" data-action="toggle-entry-group" data-group-key="${esc(groupKey)}" data-group-label="${esc(groupLabel)}" aria-controls="${groupId}" aria-expanded="${!collapsed}" aria-label="${collapsed?'Déplier':'Replier'} ${esc(groupLabel)}" title="${collapsed?'Déplier':'Replier'} ${esc(groupLabel)}">${icon('chevron',14)}</button></div></td></tr>`;
   }
   function entryTable(p,kind){
     const items=filterBudgetEntries(p,kind,model.fundingFilter);

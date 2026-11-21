@@ -1,7 +1,8 @@
 import {createBudgetDemo} from '../src/scripts/core/period-model.js';
 export function environment(view='budget',input=createBudgetDemo(),confirmationChoice='Confirmer'){
   const confirmation={hidden:true,replaceChildren(){},append(element){if(element.textContent===confirmationChoice)queueMicrotask(()=>element.click());}};
-  const main={innerHTML:''},toast={textContent:'',className:''},listeners={},controls={};
+  const main={innerHTML:''},toast={textContent:'',className:''},notifications={hidden:true},listeners={},controls={};
+  toast.classList={contains:name=>toast.className.split(/\s+/).includes(name)};
   const values=new Map([['pecule:budget:v1',JSON.stringify(input)],['marge:selected-period',input.periods[0]?.date||'2028-01']]);
   const generic={addEventListener(){},setAttribute(){},removeAttribute(){},dataset:{},innerHTML:''};
   const form={addEventListener(name,callback){this[name]=callback;},querySelector(selector){return controls[selector.match(/name="([^"]+)"/)[1]];}};
@@ -18,7 +19,7 @@ export function environment(view='budget',input=createBudgetDemo(),confirmationC
   globalThis.localStorage={get length(){return values.size;},key:index=>Array.from(values.keys())[index]??null,getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)};
   globalThis.location={hash:'#'+view,href:'http://localhost:8081/#'+view,hostname:'localhost',origin:'http://localhost:8081',pathname:'/'};
   const querySelector=document.querySelector;
-  document.querySelector=selector=>selector==='#confirmation'?confirmation:querySelector(selector);
+  document.querySelector=selector=>selector==='#confirmation'?confirmation:selector==='#notifications'?notifications:querySelector(selector);
   document.createElement=()=>({focus(){},addEventListener(event,callback){this[event]=callback;}});
   globalThis.history={replaceState(){}};globalThis.window={addEventListener(){},scrollTo(){}};
   return {main,toast,controls,dialog,resetDialog,resetControls,form,values,

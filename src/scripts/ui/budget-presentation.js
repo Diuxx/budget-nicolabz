@@ -8,7 +8,7 @@ export function createBudgetPresentation(model){
   const accountName=id=>model.data.accounts.find(account=>account.id===id)?.name||'Compte à affecter';
   const typeName=id=>model.data.incomeTypes.find(type=>type.id===id)?.name||'Revenu';
   const categoryName=id=>model.data.expenseCategories.find(category=>category.id===id)?.name||'Autres';
-  const realValue=value=>value===null?'<span class="unrecorded">À renseigner</span>':euro(value);
+  const realValue=value=>value===null?'<span class="unrecorded" title="À renseigner"><span class="unrecorded-text">À renseigner</span><span class="unrecorded-short" aria-hidden="true">?</span></span>':euro(value);
   const activeMonthText=()=>{
     const year=model.selectedPeriod.slice(0,4),month=Number(model.selectedPeriod.slice(5))-1;
     const years=[...new Set([Number(year)-1,Number(year),Number(year)+1,...model.data.periods.map(p=>Number(p.date.slice(0,4)))])].filter(y=>y>=1000&&y<=9999).sort((a,b)=>a-b);

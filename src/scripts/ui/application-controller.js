@@ -1,12 +1,13 @@
 import { loadData, saveData } from '../core/storage.js';
 import { createEmptyBudget } from '../core/period-model.js';
 import { esc, btn } from './components.js';
+import { updateNotifications } from './alerts.js';
 
 export const allowedViews=new Set(['dashboard','budget','analytics','transactions','projects','accounts','settings']);
 
 export function createApplicationController({model,connection,app,toastElement,views,onRendered,onDataChanged=()=>{}}){
   let toastTimer;
-  function showToast(message,isError=false){toastElement.textContent=message;toastElement.className=`visible ${isError?'error':''}`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastElement.className='',5000);}
+  function showToast(message,isError=false){toastElement.textContent=message;toastElement.className=`visible ${isError?'error':''}`;updateNotifications();clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toastElement.className='';updateNotifications();},5000);}
   function mutate(change,message='Enregistré localement · Drive à synchroniser'){
     if(model.loadError)throw new Error('Importez une sauvegarde valide avant de modifier le budget.');
     if(connection.busy)throw new Error('Attendez la fin de la synchronisation.');

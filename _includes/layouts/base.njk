@@ -29,11 +29,13 @@
     </div>
     <div class="app-shell">
       {% include "components/header.njk" %}
-      <section id="confirmation" class="inline-alert" role="region" aria-label="Confirmation requise" hidden></section>
-      <div id="toast" role="status" aria-live="polite"></div>
       <main class="main" id="app" tabindex="-1" aria-live="off">{{ content | safe }}</main>
       {% include "components/footer.njk" %}
     </div>
+  </div>
+  <div id="notifications" popover="manual" hidden>
+    <section id="confirmation" class="inline-alert" role="region" aria-label="Confirmation requise" hidden></section>
+    <div id="toast" role="status" aria-live="polite"></div>
   </div>
   <input type="file" id="importInput" accept=".json,application/json" hidden>
   <wa-dialog id="modal" label="Modifier"></wa-dialog>

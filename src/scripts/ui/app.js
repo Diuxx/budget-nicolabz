@@ -11,6 +11,7 @@ import { createManagementForms } from './management-forms.js';
 import { createIdentityController } from './identity-controller.js';
 import { createDataTools } from './data-tools.js';
 import { bindApplicationEvents } from './application-events.js';
+import { updateNotifications } from './alerts.js';
 
 const model = {data:undefined,currentView:'budget',selectedPeriod:currentPeriodKey(),fundingFilter:'all',loadError:null};
 const connection = {busy:false,locallyModified:false,sessionState:{authenticated:false,user:null,driveConnected:false}};
@@ -45,6 +46,7 @@ const dataTools = createDataTools({model,connection,identityApi,resetDialog,impo
 
 controller.initialize();
 identity.startSessionTracking();
+document.addEventListener('wa-after-show',event=>{if(event.target.localName==='wa-dialog')updateNotifications(true);});
 bindApplicationEvents({model,presentation,controller,budgetForms,managementForms,
   formDialog,dataTools,identity,dialog,resetDialog,importInput,toggleEntryGroup:budgetViews.toggleEntryGroup,
 });
