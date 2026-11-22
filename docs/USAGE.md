@@ -16,9 +16,9 @@ npm test
 npm run build
 ```
 
-Tests use Node.js's test runner. The build generates the static site in
-`dist/`. Both commands regenerate the public JSON schema and import template
-in `src/assets/schemas/` from the budget model.
+Tests cover data import and use Node.js's test runner. The build generates the
+static site in `dist/`. Both commands regenerate the public JSON schema and
+import template in `src/assets/schemas/` from the budget model.
 
 Notifications and confirmation prompts float at the top left of the screen.
 Success messages are green, errors are red, and confirmations are amber.
