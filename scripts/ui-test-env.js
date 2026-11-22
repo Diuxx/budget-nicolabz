@@ -5,7 +5,7 @@ export function environment(view='budget',input=createBudgetDemo(),confirmationC
   toast.classList={contains:name=>toast.className.split(/\s+/).includes(name)};
   const values=new Map([['pecule:budget:v1',JSON.stringify(input)],['marge:selected-period',input.periods[0]?.date||'2028-01']]);
   const generic={addEventListener(){},setAttribute(){},removeAttribute(){},dataset:{},innerHTML:''};
-  const form={addEventListener(name,callback){this[name]=callback;},querySelector(selector){return controls[selector.match(/name="([^"]+)"/)[1]];}};
+  const form={focus(){this.focused=true;},addEventListener(name,callback){this[name]=callback;},querySelector(selector){return controls[selector.match(/name="([^"]+)"/)[1]];}};
   const dialog={open:false,set innerHTML(html){this.html=html;for(const match of html.matchAll(/<wa-(?:input|select|textarea)\b([^>]+)>/g)){
     const attrs=match[1],name=attrs.match(/name="([^"]+)"/)?.[1];if(name)controls[name]={value:attrs.match(/value="([^"]*)"/)?.[1]??'',style:{},disabled:false,addEventListener(event,callback){this[event]=callback;}};
   }},querySelector(selector){return selector==='form'?form:selector.startsWith('[name=')?form.querySelector(selector):generic;}};
@@ -21,8 +21,9 @@ export function environment(view='budget',input=createBudgetDemo(),confirmationC
   const querySelector=document.querySelector;
   document.querySelector=selector=>selector==='#confirmation'?confirmation:selector==='#notifications'?notifications:querySelector(selector);
   document.createElement=()=>({focus(){},addEventListener(event,callback){this[event]=callback;}});
-  globalThis.history={replaceState(){}};globalThis.window={addEventListener(){},scrollTo(){}};
-  return {main,toast,controls,dialog,resetDialog,resetControls,form,values,
+  const viewport={mobile:false};
+  globalThis.history={replaceState(){}};globalThis.window={addEventListener(){},scrollTo(){},matchMedia:()=>({matches:viewport.mobile})};
+  return {main,toast,controls,dialog,resetDialog,resetControls,form,values,viewport,
     saved:()=>JSON.parse(values.get('pecule:budget:v1')),
     action(name,id,extra={}){const target={dataset:{action:name,id,...extra},closest:selector=>selector==='[data-action]'?target:null};listeners.click({target});},
     click(target){listeners.click({target});},

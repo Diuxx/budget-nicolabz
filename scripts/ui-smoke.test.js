@@ -9,13 +9,23 @@ test('budget : tableaux réunis sans cartes de synthèse',async()=>{
   assert.match(env.main.innerHTML,/aria-label="Liste des dépenses" tabindex="0"/);
   assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Entrées d’argent" data-kind="income"/);
   assert.match(env.main.innerHTML,/class="nz-table nz-table-compact nz-table-sticky period-table" aria-label="Dépenses et épargne" data-kind="expense"/);
+  assert.match(env.main.innerHTML,/data-action="add-income" aria-label="Ajouter un revenu"><svg[^>]*aria-hidden="true">[\s\S]*?<\/svg>Revenue<\/button>/);
+  assert.match(env.main.innerHTML,/data-action="add-expense" aria-label="Ajouter une dépense"><svg[^>]*aria-hidden="true">[\s\S]*?<\/svg>Dépense<\/button>/);
   assert.match(env.main.innerHTML,/<th scope="col" class="nz-table-align-end">Ecart<\/th>/);
   assert.match(env.main.innerHTML,/<th scope="col" class="nz-table-align-end">Disponible<\/th>/);
   assert.equal((env.main.innerHTML.match(/<th scope="col" class="nz-table-align-end">Actions<\/th>/g)||[]).length,2);
   assert.match(env.main.innerHTML,/data-action="record-income"[^>]*aria-label="Pointer Épargne de précaution" title="Pointer Épargne de précaution"/);
   assert.match(env.main.innerHTML,/data-action="record-expense"[^>]*aria-label="Pointer Alimentation" title="Pointer Alimentation"/);
+  assert.match(env.main.innerHTML,/data-action="record-income"[^>]*title="Pointer Épargne de précaution"><svg[^>]*>[\s\S]*?<\/svg><\/button>/);
+  assert.match(env.main.innerHTML,/data-action="record-expense"[^>]*title="Pointer Alimentation"><svg[^>]*>[\s\S]*?<\/svg><\/button>/);
+  assert.match(env.main.innerHTML,/<tr data-budget-entry="income" data-id="demo-salary">[\s\S]*?data-action="record-income"[^>]*title="Pointer/);
+  assert.match(env.main.innerHTML,/<button type="button" class="entry-mobile-open" data-action="record-expense"[^>]*aria-label="Pointer Alimentation"/);
+  assert.doesNotMatch(env.main.innerHTML,/data-action="edit-(?:income|expense)"/);
   assert.match(env.main.innerHTML,/<span class="unrecorded-text">À renseigner<\/span><span class="unrecorded-short" aria-hidden="true">\?<\/span>/);
-  assert.match(env.main.innerHTML,/<th scope="row" colspan="2" class="ledger-label-wide">Compte principal · Sous-total<\/th><th scope="row" class="ledger-label-mobile">Compte principal · Sous-total<\/th>/);
+  assert.match(env.main.innerHTML,/<th scope="row" colspan="2" class="ledger-label-wide">Compte principal<\/th><th scope="row" class="ledger-label-mobile">Compte principal<\/th>/);
+  const expenseTable=env.main.innerHTML.match(/<table[^>]*data-kind="expense"[\s\S]*?<\/table>/)[0];
+  assert.match(expenseTable,/<th scope="row" colspan="2" class="ledger-label-wide">Compte principal<\/th><th scope="row" class="ledger-label-mobile">Compte principal<\/th>/);
+  assert.doesNotMatch(env.main.innerHTML,/Sous-total/);
   assert.doesNotMatch(env.main.innerHTML,/class="period-metrics"|class="recording-note"/);
   assert.ok(env.main.innerHTML.includes('À renseigner'));
   assert.doesNotMatch(env.main.innerHTML,/Marge minimale souhaitée|data-field="min-margin"/);
@@ -23,6 +33,7 @@ test('budget : tableaux réunis sans cartes de synthèse',async()=>{
 test('navigation sur un mois absent : aucun budget créé sans action',async()=>{
   const env=environment('budget',createEmptyBudget());await import('../src/scripts/ui/app.js?empty-refactor');
   env.action('next-month');assert.equal(env.saved().periods.length,0);assert.ok(env.main.innerHTML.includes('Préparons Février 2028'));
+  assert.match(env.main.innerHTML,/class="panel period-empty budget-period-empty"/);
 });
 test('dashboard, annuel, journal, projets et paramètres utilisent le nouveau modèle',async()=>{
   for(const [view,text] of [['dashboard','Répartition par compte'],['analytics','Mois à préparer'],['transactions','Journal du mois'],['projects','demandes de financement'],['accounts','Compte principal'],['settings','Types de revenus']]){

@@ -9,7 +9,7 @@ import { allowedViews } from './application-controller.js';
 export function bindApplicationEvents({model,presentation,controller,budgetForms,managementForms,formDialog,dataTools,identity,dialog,resetDialog,importInput,toggleEntryGroup}){
   const {period,monYear}=presentation;
   const {mutate,setView,selectPeriod,render,showToast}=controller;
-  const {entryForm,recordForm}=budgetForms;
+  const {entryForm,recordForm,openRecordDetails}=budgetForms;
   const {projectForm,accountForm,referenceForm,deleteReference}=managementForms;
   const {copyPlannedReal}=formDialog;
   const {openResetDialog,performFullReset,importBudget}=dataTools;
@@ -27,7 +27,7 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       return;
     }
     if(action==='record-income'||action==='record-expense'){
-      const item=(action==='record-income'?p.incomes:p.expenses).find(item=>item.id===key);
+      const item=(action==='record-income'?p?.incomes:p?.expenses)?.find(item=>item.id===key);
       recordForm(action==='record-income'?'income':'expense',item);return;
     }
     if(action==='delete-income'||action==='delete-expense'){
@@ -57,6 +57,7 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
       }
       case 'add-expense':entryForm('expense');break;
       case 'cancel-dialog':dialog.open=false;break;
+      case 'record-details':openRecordDetails();break;
       case 'copy-planned-real':copyPlannedReal();break;
       case 'view-budget':setView('budget');break;
       case 'view-analytics':setView('analytics');break;
@@ -94,7 +95,13 @@ export function bindApplicationEvents({model,presentation,controller,budgetForms
     }
   }
     document.querySelector('#profileMenu')?.addEventListener('wa-select',event=>{try{if(event.detail?.item?.value)void act(event.detail.item.value,event.detail.item).catch(error=>showToast(error.message,true));}catch(error){showToast(error.message,true);}});
-    document.addEventListener('click',event=>{try{const viewButton=event.target.closest('[data-view]');if(viewButton){setView(viewButton.dataset.view);return;}const button=event.target.closest('[data-action]');if(button)void act(button.dataset.action,button).catch(error=>showToast(error.message,true));}catch(error){showToast(error.message,true);}});
+    document.addEventListener('click',event=>{try{
+      const viewButton=event.target.closest('[data-view]');if(viewButton){setView(viewButton.dataset.view);return;}
+      const button=event.target.closest('[data-action]');if(button){void act(button.dataset.action,button).catch(error=>showToast(error.message,true));return;}
+      if(event.target.closest('button, a, input, select, textarea, wa-button'))return;
+      const row=event.target.closest('tr[data-budget-entry]');
+      if(row&&window.matchMedia('(max-width: 590px)').matches)void act(`record-${row.dataset.budgetEntry}`,row).catch(error=>showToast(error.message,true));
+    }catch(error){showToast(error.message,true);}});
     document.addEventListener('change',event=>{
       const el=event.target;
       try{

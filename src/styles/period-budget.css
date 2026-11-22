@@ -45,6 +45,8 @@
 .data-table small, .period-table small { display: block; color: var(--muted); font-size: 10px; margin-top: 5px; max-width: 260px; white-space: normal; }
 .period-table th, .period-table td { white-space: nowrap; }
 .period-table thead th { color: var(--muted); font-size: 11px; font-weight: 650; }
+.budget-ledgers .period-table thead th { text-align: center; }
+.budget-ledgers .period-table tbody td:not(:first-child) { text-align: center; }
 .period-table td { vertical-align: middle; padding-block: 12px; }
 .period-table td:first-child strong { font-size: 12px; }
 @media (min-width: 1100px) {
@@ -79,7 +81,7 @@
   .budget-ledgers .entry-actions { flex-wrap: wrap; gap: 3px; }
 }
 .ledger-account th { color: var(--sage); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
-.ledger-label-mobile, .unrecorded-short { display: none; }
+.ledger-label-mobile, .unrecorded-short, .entry-mobile-open { display: none; }
 .period-table tbody[hidden] { display: none; }
 .ledger-toggle { display: grid; place-items: center; width: 27px; height: 27px; padding: 0; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--sage); cursor: pointer; }
 .ledger-toggle:hover { background: var(--color-surface-muted); }
@@ -87,6 +89,8 @@
 .ledger-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
 .entry-tag { font-size: 10px; color: var(--sage); }
 .entry-actions { display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
+.budget-ledgers .entry-actions { justify-content: center; }
+.budget-ledgers .entry-actions .button[data-action^="record-"] { width: 27px; min-height: 27px; padding: 0; justify-content: center; }
 @media (max-width: 1099px) {
   .budget-ledgers .period-table { min-width: 0; table-layout: fixed; }
   .budget-ledgers .period-table th, .budget-ledgers .period-table td { padding: 6px 2px; white-space: normal; overflow-wrap: anywhere; }
@@ -99,41 +103,28 @@
   .budget-ledgers .entry-actions { flex-wrap: wrap; gap: 2px; }
 }
 @media (max-width: 590px) {
+  .budget-ledgers .ledger-panel { padding: 0; }
+  .budget-ledgers .period-table { table-layout: auto; }
   .budget-ledgers .period-table, .budget-ledgers .period-table td:first-child strong { font-size: 10px; }
   .budget-ledgers .period-table thead th, .budget-ledgers .period-table small { font-size: 9px; }
-  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(1) { width: auto; }
-  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(2) { width: 15%; }
-  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(3),
-  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(4) { width: 13%; }
-  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(5) { width: 12%; }
-  .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(6) { width: 60px; }
-  .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(1) { width: auto; }
-  .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(2) { width: 15%; }
-  .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(3),
-  .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(4),
-  .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(5) { width: 18%; }
-  .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(6) { width: 60px; }
-  .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(2),
-  .budget-ledgers .period-table[data-kind="income"] tbody tr:not(.ledger-account) > td:nth-child(2),
-  .budget-ledgers .period-table[data-kind="income"] .ledger-label-wide { display: none; }
-  .budget-ledgers .period-table[data-kind="income"] .ledger-label-mobile { display: table-cell; }
+  .budget-ledgers .period-table thead th:nth-child(1) { width: auto; }
+  .budget-ledgers .period-table thead th:nth-child(3),
+  .budget-ledgers .period-table thead th:nth-child(4),
+  .budget-ledgers .period-table thead th:nth-child(5) { width: 18%; }
+  /* Le tableau automatique conserve ainsi la largeur minimale des actions. */
+  .budget-ledgers .period-table thead th:nth-child(6) { width: 1%; white-space: nowrap; }
+  .budget-ledgers .period-table thead th:nth-child(2),
+  .budget-ledgers .period-table tbody tr:not(.ledger-account) > td:nth-child(2),
+  .budget-ledgers .period-table .ledger-label-wide { display: none; }
+  .budget-ledgers .period-table .ledger-label-mobile { display: table-cell; }
   .budget-ledgers .period-table .unrecorded-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .budget-ledgers .period-table .unrecorded-short { display: inline; }
-  .budget-ledgers .entry-actions .button[data-action^="record-"] { width: 27px; min-height: 27px; padding: 0; justify-content: center; }
-  .budget-ledgers .entry-actions .button[data-action^="record-"] span { display: none; }
-}
-@media (max-width: 590px) {
-  .budget-ledgers .period-table[data-kind="expense"] .entry-actions { display: grid; grid-template-columns: repeat(2, 27px); }
-  .budget-ledgers .period-table[data-kind="expense"] [data-action="record-expense"] { grid-area: 1 / 1; }
-  .budget-ledgers .period-table[data-kind="expense"] [data-action="edit-expense"] { grid-area: 1 / 2; }
-  .budget-ledgers .period-table[data-kind="expense"] [data-action="duplicate-expense"] { grid-area: 2 / 1; }
-  .budget-ledgers .period-table[data-kind="expense"] [data-action="delete-expense"] { grid-area: 2 / 2; }
-  .budget-ledgers .period-table[data-kind="income"] .entry-actions { display: grid; grid-template-columns: repeat(2, 27px); }
-  .budget-ledgers .period-table[data-kind="income"] [data-action="record-income"] { grid-area: 1 / 1; }
-  .budget-ledgers .period-table[data-kind="income"] [data-action="edit-income"] { grid-area: 1 / 2; }
-  .budget-ledgers .period-table[data-kind="income"] [data-action="duplicate-income"] { grid-area: 2 / 1; }
-  .budget-ledgers .period-table[data-kind="income"] [data-action="delete-income"] { grid-area: 2 / 2; }
-  .budget-ledgers .period-table .ledger-account .entry-actions { display: flex; }
+  .budget-ledgers .entry-actions .button[data-action^="record-"],
+  .budget-ledgers .period-table .entry-label { display: none; }
+  .budget-ledgers .entry-actions { flex-wrap: nowrap; }
+  .budget-ledgers .period-table tr[data-budget-entry] { cursor: pointer; }
+  .budget-ledgers .entry-mobile-open { display: block; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+  .budget-ledgers .entry-mobile-open:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 }
 @media (min-width: 591px) and (max-width: 1099px) {
   .budget-ledgers .period-table[data-kind="expense"] thead th:nth-child(5) { width: 10%; }
@@ -141,14 +132,6 @@
   .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(2) { width: 16%; }
   .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(5) { width: 12%; }
   .budget-ledgers .period-table[data-kind="income"] thead th:nth-child(6) { width: 24%; }
-}
-@media (min-width: 591px) and (max-width: 800px), (min-width: 1100px) and (max-width: 1450px) {
-  .budget-ledgers .period-table[data-kind="expense"] .entry-actions .button[data-action^="record-"] { width: 27px; min-height: 27px; padding: 0; justify-content: center; }
-  .budget-ledgers .period-table[data-kind="expense"] .entry-actions .button[data-action^="record-"] span { display: none; }
-}
-@media (min-width: 591px) and (max-width: 820px), (min-width: 1100px) and (max-width: 1550px) {
-  .budget-ledgers .period-table[data-kind="income"] .entry-actions .button[data-action^="record-"] { width: 27px; min-height: 27px; padding: 0; justify-content: center; }
-  .budget-ledgers .period-table[data-kind="income"] .entry-actions .button[data-action^="record-"] span { display: none; }
 }
 .unrecorded { color: #b42318; font-size: 11px; font-weight: 700; }
 :root[data-theme="dark"] .unrecorded { color: var(--danger); }
@@ -185,6 +168,7 @@ wa-dialog#modal { --width: min(570px,calc(100vw - 28px)); }
 @media(max-width:1190px){.period-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:880px){.overview-grid{grid-template-columns:1fr;}.project-overview{grid-template-columns:1fr;gap:16px;}.reference-grid{grid-template-columns:1fr;}.view-toolbar{gap:12px;}}
 @media(max-width:590px){.period-metrics{grid-template-columns:1fr;}.period-metric{padding:13px;}.metric-heading{margin-bottom:9px;}.period-empty{padding:22px 16px;margin:16px auto;}.period-empty h2{font-size:20px;}.modal-form .form-fields{grid-template-columns:1fr;}.year-bars{gap:4px;}.year-bar-month small{font-size:8px;}.account-summary-row{gap:8px;font-size:11px;}#fundingFilter{width:100%;}.view-toolbar>.inline-actions{width:100%;justify-content:space-between;}}
+@media(max-width:590px){.period-empty.budget-period-empty{padding:0;}}
 
 /* Extension 0.8.1 : ventilation par source et épargne annuelle, dans la grille compacte. */
 .filter-context { font-size: 10px; color: var(--muted); font-weight: 400; }
@@ -199,7 +183,7 @@ wa-dialog#modal { --width: min(570px,calc(100vw - 28px)); }
 .annual-saving-line strong { font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
 .annual-saving-line wa-progress-bar { --height: 7px; --track-color: var(--art); --indicator-color: var(--sage); }
 .annual-saving-line wa-progress-bar.actual-savings { --indicator-color: #658f7b; }
-@media(max-width:590px) { .annual-saving-row { grid-template-columns: 1fr; gap: 8px; } .filter-context { display: none; } }
+@media(max-width:590px) { .annual-saving-panel { padding: 0; } .annual-saving-row { grid-template-columns: 1fr; gap: 8px; } .filter-context { display: none; } }
 
 /* Réinitialisation volontaire, isolée de la sauvegarde Google Drive. */
 .reset-tools { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
@@ -232,6 +216,7 @@ wa-dialog.reset-dialog .reset-hint { font-size: 12px; margin: 0 0 14px; }
 .modal-form wa-button.btn.secondary:hover::part(button) { background: #374b43; }
 
 .modal-form.record-form .form-fields > :first-child { grid-column: auto; }
+.record-form .modal-footer [data-action="record-details"] { margin-right: auto; }
 .top-nav { background: var(--color-surface); border-color: var(--color-border); }
 .top-nav wa-button.nav-link.active::part(base),
 .top-nav wa-button.nav-link.active::part(button) { background: var(--color-button); color: var(--color-button-text); }

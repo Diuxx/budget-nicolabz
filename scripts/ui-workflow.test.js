@@ -132,7 +132,7 @@ test('les dépenses liées remboursent les crédits pointés et restent modifiab
   assert.equal(env.saved().projects[0].type,'credit');
   env.action('view-budget');env.action('add-expense');
   assert.doesNotMatch(env.dialog.html,/Crédit - Auto/);
-  env.action('edit-expense',expense.id);
+  env.action('record-expense',expense.id);env.action('record-details');
   assert.match(env.dialog.html,/<wa-option value="credit:auto"[^>]*selected[^>]*>Crédit - Auto<\/wa-option>/);
   env.controls.realAmount.value='250';env.submit();
   assert.equal(env.saved().periods[0].expenses.find(item=>item.id===expense.id).projectId,'auto');
@@ -242,6 +242,52 @@ test('pointage limité aux montants et note, sans modification des autres inform
     assert.match(env.dialog.html,/name="accountId"/);
     assert.equal(env.controls.note.value,'À vérifier');
   }
+});
+
+test('les détails conservent les modifications en cours sans enregistrer ni pointer implicitement',async()=>{
+  const env=environment();await import('../src/scripts/ui/app.js?record-details');
+  for(const [kind,collection,id] of [['income','incomes','demo-savings'],['expense','expenses','demo-expense-1']]){
+    const before=env.saved();
+    env.action('record-'+kind,id);
+    assert.match(env.dialog.html,/<div class="modal-footer">[\s\S]*?data-action="record-details"[\s\S]*?data-action="cancel-dialog"/);
+    env.controls.plannedAmount.value='123';env.controls.note.value='Brouillon';
+    env.action('record-details');
+    assert.deepEqual(env.saved(),before);
+    assert.equal(env.controls.plannedAmount.value,'123');
+    assert.equal(env.controls.realAmount.value,'');
+    assert.equal(env.controls.note.value,'Brouillon');
+    assert.equal(env.form.focused,true);
+    env.action('cancel-dialog');
+    assert.deepEqual(env.saved(),before);
+    env.action('record-'+kind,id);
+    env.controls.realAmount.value='0';env.action('record-details');
+    assert.equal(env.controls.realAmount.value,'0');
+    env.submit();
+    assert.equal(env.saved().periods[0][collection].find(item=>item.id===id).realAmount,0);
+    env.action('record-'+kind,id);
+    assert.equal(env.controls.realAmount.value,'0');
+    env.controls.realAmount.value='';env.action('record-details');
+    assert.equal(env.controls.realAmount.value,'');
+    env.submit();
+    assert.equal(env.saved().periods[0][collection].find(item=>item.id===id).realAmount,null);
+  }
+});
+
+test('sur mobile la ligne ouvre le pointage sans intercepter les actions',async()=>{
+  const env=environment();await import('../src/scripts/ui/app.js?mobile-record-row');
+  const row={dataset:{budgetEntry:'expense',id:'demo-expense-1'}};
+  const cell={closest:selector=>selector==='tr[data-budget-entry]'?row:null};
+  env.click(cell);assert.equal(env.dialog.open,false);
+  env.viewport.mobile=true;env.click(cell);
+  assert.equal(env.dialog.label,'Pointer · Alimentation');
+  env.action('cancel-dialog');
+  const duplicate={dataset:{action:'duplicate-expense',id:row.dataset.id},closest:selector=>selector==='[data-action]'?duplicate:selector==='tr[data-budget-entry]'?row:null};
+  const count=env.saved().periods[0].expenses.length;
+  env.click(duplicate);
+  assert.equal(env.saved().periods[0].expenses.length,count+1);
+  assert.equal(env.dialog.open,false);
+  const otherButton={closest:selector=>selector==='button, a, input, select, textarea, wa-button'?otherButton:selector==='tr[data-budget-entry]'?row:null};
+  env.click(otherButton);assert.equal(env.dialog.open,false);
 });
 
 test('le tableau de bord propose le pointage rapide des revenus et dépenses à renseigner',async()=>{

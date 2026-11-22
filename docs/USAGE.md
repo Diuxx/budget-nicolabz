@@ -44,9 +44,11 @@ from recorded entries, not bank balances.
 Use the arrow on a subtotal row to collapse or expand its entries. Income,
 recorded expenses, and unrecorded expenses are controlled independently.
 The selection remains in effect while using the app, but resets on reload.
-In compact table layouts, the checkmark action records an entry's actual amount.
-On mobile, `?` marks an actual amount that has not been entered, and the income
-table hides the type and origin column.
+Use the checkmark action **Pointer** to enter or update an actual amount. Its **Détails** button
+opens the full entry editor without saving; changes made in the quick form are
+carried over. On mobile, select the row or its label to open the quick form.
+`?` marks an actual amount that has not been entered. The income table hides
+the type and origin column, and the expense table hides category and funding.
 
 In **Projets**, a credit project stores the amount to repay separately from
 savings and financing objectives. In Budget, select **Crédit - [name]** as an
