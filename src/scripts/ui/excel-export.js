@@ -15,7 +15,7 @@ export async function createExcelBudget(data,ExcelJS,template){
     const sheet=workbook.addWorksheet(`budget - ${year}`);
     sheet.columns=[{width:22},{width:34},{width:25},{width:30},{width:12},...MONTHS.map(()=>({width:15}))];
     sheet.views=[{state:'frozen',xSplit:5,ySplit:4}];
-    sheet.addRow([`Pécule — Budget ${year}`]);
+    sheet.addRow([`Pécule - Budget ${year}`]);
     sheet.addRow(['Virements internes : affichés dans le détail, exclus des revenus de synthèse.']);
     sheet.addRow([]);
     const header=sheet.addRow(['Type','Poste','Compte','Financé par','Montants',...MONTHS]);
@@ -49,7 +49,7 @@ export async function createExcelBudget(data,ExcelJS,template){
     }
     sheet.addRow([]);
     for(const line of lines.values())for(const field of ['planned','real'])sheet.addRow([line.label,line.name,line.account,line.source,field==='planned'?'Prévu':'Réel',...line[field]]);
-    for(let column=6;column<=17;column++)sheet.getColumn(column).numFmt='#,##0.00;[Red](#,##0.00);"—"';
+    for(let column=6;column<=17;column++)sheet.getColumn(column).numFmt='#,##0.00;[Red](#,##0.00);"-"';
     sheet.autoFilter={from:'A4',to:`Q${sheet.rowCount}`};
   }
   return workbook;

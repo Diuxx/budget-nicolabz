@@ -49,12 +49,12 @@ Prioritize human readability over cleverness or excessive abstraction.
 
 ## 5. Agent Workflow
 
-1. **Inspect** — Understand the relevant implementation and conventions.
-2. **Plan** — Identify the smallest coherent change and its impacts.
-3. **Implement** — Write readable code respecting existing patterns.
-4. **Verify** — Follow the project's testing and verification instructions.
-5. **Simplify** — Remove unnecessary complexity, duplication, and abstractions.
-6. **Report** — Summarize changes, decisions, performed checks, and limitations.
+1. **Inspect** - Understand the relevant implementation and conventions.
+2. **Plan** - Identify the smallest coherent change and its impacts.
+3. **Implement** - Write readable code respecting existing patterns.
+4. **Verify** - Follow the project's testing and verification instructions.
+5. **Simplify** - Remove unnecessary complexity, duplication, and abstractions.
+6. **Report** - Summarize changes, decisions, performed checks, and limitations.
 
 Keep planning and reporting proportional to task complexity.
 
@@ -94,10 +94,10 @@ The README is a **project overview, not a technical manual**.
 
 It should include:
 
-1. **Introduction** — Project name, purpose, and a brief description.
-2. **Features** — Main capabilities, summarized in a few bullet points.
-3. **Quick Start** — Minimal commands to get started, only when relevant.
-4. **Documentation** — A link to [`docs/USAGE.md`](docs/USAGE.md).
+1. **Introduction** - Project name, purpose, and a brief description.
+2. **Features** - Main capabilities, summarized in a few bullet points.
+3. **Quick Start** - Minimal commands to get started, only when relevant.
+4. **Documentation** - A link to [`docs/USAGE.md`](docs/USAGE.md).
 
 ### docs/USAGE.md
 
@@ -134,9 +134,9 @@ Markdown files (`*.md`) are read-only by default.
 
 The following files may be created or updated without explicit permission:
 
-- `README.md` — Keep the project description, technologies, setup, execution, and testing commands accurate.
-- `docs/RESUME.md` — Maintain a concise technical summary of the project's architecture for future development sessions.
-- `docs/USAGE.md` — Maintain detailed, verified usage and development instructions.
+- `README.md` - Keep the project description, technologies, setup, execution, and testing commands accurate.
+- `docs/RESUME.md` - Maintain a concise technical summary of the project's architecture for future development sessions.
+- `docs/USAGE.md` - Maintain detailed, verified usage and development instructions.
 
 Create `AGENTS.md` or `docs/PROJECT.md` when missing, based on verified project
 information. Once they exist, treat them as read-only unless the user explicitly
